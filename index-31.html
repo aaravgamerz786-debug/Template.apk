@@ -1,0 +1,2547 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Apeion Language Learners 🇩🇪</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+  :root {
+    --green: #58CC02;
+    --green-dark: #45a800;
+    --blue: #1CB0F6;
+    --blue-dark: #0a91d1;
+    --red: #FF4B4B;
+    --yellow: #FFC800;
+    --orange: #FF9600;
+    --purple: #CE82FF;
+    --bg: #131f24;
+    --bg2: #1a2d35;
+    --bg3: #1f3540;
+    --card: #1e2e38;
+    --card2: #243848;
+    --text: #FFFFFF;
+    --text2: #afafaf;
+    --border: #2d4a5a;
+    --font: 'Baloo 2', cursive;
+    --font2: 'Nunito', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    touch-action: manipulation;
+  }
+
+  /* ========= SCREENS ========= */
+  .screen { display: none; flex-direction: column; min-height: 100vh; width: 100%; }
+  .screen.active { display: flex; }
+
+  /* ======= LOGIN SCREEN ======= */
+  #loginScreen {
+    background: linear-gradient(160deg, #0a1f2e 0%, #13344a 50%, #0a1f2e 100%);
+    align-items: center; justify-content: center;
+    padding: 40px 24px; position: relative; overflow: hidden;
+  }
+  #loginScreen::before {
+    content:''; position:absolute; top:-80px; right:-80px;
+    width:280px; height:280px; border-radius:50%;
+    background: radial-gradient(circle, rgba(88,204,2,0.15) 0%, transparent 70%);
+  }
+  #loginScreen::after {
+    content:''; position:absolute; bottom:-60px; left:-60px;
+    width:240px; height:240px; border-radius:50%;
+    background: radial-gradient(circle, rgba(28,176,246,0.12) 0%, transparent 70%);
+  }
+  .login-logo { font-size: 64px; margin-bottom: 16px; z-index:1; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .login-title { font-size: 30px; font-weight: 800; color:#fff; text-align:center; z-index:1; line-height:1.2; margin-bottom:6px; }
+  .login-title span { color: var(--green); }
+  .login-sub { font-size:14px; color:var(--text2); text-align:center; font-family:var(--font2); z-index:1; margin-bottom:36px; line-height:1.5; }
+
+  .login-card {
+    width:100%; max-width:340px; background:var(--card);
+    border-radius:24px; padding:28px 24px;
+    border:1px solid var(--border); z-index:1;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .login-card-title { font-size:18px; font-weight:800; text-align:center; margin-bottom:6px; }
+  .login-card-sub { font-size:13px; color:var(--text2); font-family:var(--font2); text-align:center; margin-bottom:24px; }
+
+  .google-btn {
+    width:100%; background:#fff; border:none;
+    border-radius:14px; padding:14px 20px;
+    display:flex; align-items:center; gap:12px;
+    cursor:pointer; font-size:15px; font-weight:700;
+    color:#1f1f1f; font-family:var(--font);
+    box-shadow: 0 4px 0 #ccc, 0 6px 20px rgba(0,0,0,0.2);
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-bottom:14px;
+  }
+  .google-btn:active { transform:translateY(2px); box-shadow:0 2px 0 #ccc; }
+  .google-icon { width:22px; height:22px; flex-shrink:0; }
+  .divider { display:flex; align-items:center; gap:10px; margin:4px 0 14px; }
+  .divider-line { flex:1; height:1px; background:var(--border); }
+  .divider-text { font-size:12px; color:var(--text2); font-family:var(--font2); }
+
+  .guest-btn {
+    width:100%; background:transparent; border:2px solid var(--border);
+    border-radius:14px; padding:13px; font-size:14px;
+    font-weight:700; color:var(--text2); font-family:var(--font);
+    cursor:pointer; transition: all 0.2s;
+  }
+  .guest-btn:active { background:var(--card2); }
+
+  .login-footer { font-size:11px; color:var(--text2); font-family:var(--font2); text-align:center; margin-top:16px; z-index:1; opacity:0.7; }
+
+  /* User bar in header */
+  .user-avatar-mini {
+    width:32px; height:32px; border-radius:50%;
+    overflow:hidden; border:2px solid var(--green);
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px; background:var(--card2);
+    cursor:pointer;
+  }
+  .user-avatar-mini img { width:100%; height:100%; object-fit:cover; }
+
+  /* Save indicator */
+  .save-toast {
+    position:fixed; bottom:90px; left:50%;
+    transform:translateX(-50%);
+    background:rgba(88,204,2,0.9); color:#fff;
+    border-radius:20px; padding:6px 16px;
+    font-size:12px; font-weight:700; font-family:var(--font2);
+    z-index:500; animation:toastAnim 2s ease forwards;
+    pointer-events:none; white-space:nowrap;
+  }
+  @keyframes toastAnim {
+    0%{opacity:0;transform:translateX(-50%) translateY(10px)}
+    15%{opacity:1;transform:translateX(-50%) translateY(0)}
+    75%{opacity:1}
+    100%{opacity:0;transform:translateX(-50%) translateY(-5px)}
+  }
+
+  /* Sync spinner */
+  .sync-spin {
+    display:inline-block; width:14px; height:14px;
+    border:2px solid rgba(255,255,255,0.3);
+    border-top-color:#fff; border-radius:50%;
+    animation:spin 0.8s linear infinite; vertical-align:middle;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  #homeScreen {
+    background: linear-gradient(160deg, #0a1f2e 0%, #13344a 50%, #0a1f2e 100%);
+    align-items: center;
+    padding: 40px 24px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  #homeScreen::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(88,204,2,0.12) 0%, transparent 70%);
+  }
+  #homeScreen::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 240px; height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(28,176,246,0.1) 0%, transparent 70%);
+  }
+
+  .flag-container {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 32px; z-index: 1;
+  }
+  .flag { font-size: 52px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); }
+  .arrow-icon { font-size: 28px; color: var(--text2); }
+
+  .app-title {
+    font-size: 38px; font-weight: 800;
+    color: #fff; text-align: center;
+    line-height: 1.1; z-index: 1;
+    text-shadow: 0 2px 20px rgba(88,204,2,0.3);
+  }
+  .app-title span { color: var(--green); }
+
+  .app-subtitle {
+    font-size: 15px; color: var(--text2);
+    text-align: center; margin: 10px 0 36px;
+    z-index: 1; font-family: var(--font2);
+    line-height: 1.5;
+  }
+
+  .streak-bar {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border-radius: 16px;
+    padding: 14px 20px; width: 100%; max-width: 340px;
+    margin-bottom: 32px; z-index: 1;
+    border: 1px solid var(--border);
+  }
+  .streak-icon { font-size: 28px; }
+  .streak-info { flex: 1; }
+  .streak-label { font-size: 12px; color: var(--text2); font-family: var(--font2); }
+  .streak-value { font-size: 20px; font-weight: 800; color: var(--orange); }
+  .xp-badge {
+    background: rgba(255,200,0,0.15);
+    border: 1px solid var(--yellow);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 13px; font-weight: 700;
+    color: var(--yellow);
+  }
+
+  .start-btn {
+    width: 100%; max-width: 340px;
+    background: var(--green);
+    border: none; border-radius: 16px;
+    padding: 18px; font-size: 18px;
+    font-weight: 800; color: #fff;
+    font-family: var(--font);
+    cursor: pointer; z-index: 1;
+    box-shadow: 0 6px 0 var(--green-dark), 0 8px 20px rgba(88,204,2,0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+    letter-spacing: 0.5px;
+  }
+  .start-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--green-dark); }
+
+  /* ======= PATH SCREEN ======= */
+  #pathScreen {
+    background: var(--bg);
+    padding-bottom: 80px;
+  }
+
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .top-bar-title { font-size: 18px; font-weight: 800; }
+  .top-bar-stats { display: flex; gap: 16px; align-items: center; }
+  .stat-pill {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--card); border-radius: 20px;
+    padding: 6px 12px; font-size: 13px; font-weight: 700;
+  }
+  .stat-pill .icon { font-size: 16px; }
+
+  .path-container {
+    padding: 24px 20px; display: flex;
+    flex-direction: column; align-items: center; gap: 0;
+  }
+
+  .section-header {
+    width: 100%; background: var(--green);
+    border-radius: 16px; padding: 14px 20px;
+    margin-bottom: 24px; text-align: center;
+    font-size: 14px; font-weight: 700;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    box-shadow: 0 4px 0 var(--green-dark);
+  }
+
+  .lesson-row {
+    display: flex; justify-content: center;
+    width: 100%; margin-bottom: 12px;
+    position: relative;
+  }
+
+  .lesson-btn {
+    width: 72px; height: 72px;
+    border-radius: 50%; border: none;
+    font-size: 28px; cursor: pointer;
+    position: relative; transition: transform 0.15s;
+    box-shadow: 0 5px 0 rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lesson-btn:active { transform: scale(0.93); }
+  .lesson-btn.locked { background: var(--card2); filter: grayscale(1) opacity(0.5); cursor: not-allowed; }
+  .lesson-btn.completed { background: var(--green); box-shadow: 0 5px 0 var(--green-dark); }
+  .lesson-btn.available { background: var(--blue); box-shadow: 0 5px 0 var(--blue-dark); animation: pulse 2s infinite; }
+  .lesson-btn.current {
+    background: var(--yellow); box-shadow: 0 5px 0 #cc9900;
+    width: 84px; height: 84px; font-size: 34px;
+    animation: bob 1.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .lesson-label {
+    position: absolute; bottom: -20px;
+    left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: var(--text2);
+    font-family: var(--font2); font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .path-connector {
+    width: 3px; height: 32px;
+    background: var(--border); border-radius: 2px;
+    margin: 0 auto 12px;
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; background: var(--bg2);
+    border-top: 1px solid var(--border); z-index: 200;
+  }
+  .nav-btn {
+    flex: 1; padding: 12px 0; border: none;
+    background: transparent; color: var(--text2);
+    font-size: 22px; cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 3px;
+    font-family: var(--font2); transition: color 0.2s;
+  }
+  .nav-btn.active { color: var(--green); }
+  .nav-btn span { font-size: 10px; font-weight: 700; }
+
+  /* ======= AI TEACHER SCREEN ======= */
+  #aiTeacherScreen { background: var(--bg); padding-bottom: 130px; }
+  .ai-chat-area {
+    flex: 1; overflow-y: auto; padding: 16px 14px 8px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .ai-msg { display: flex; gap: 8px; align-items: flex-end; max-width: 88%; }
+  .ai-msg-bot { align-self: flex-start; }
+  .ai-msg-user { align-self: flex-end; flex-direction: row-reverse; }
+  .ai-msg-avatar {
+    width: 30px; height: 30px; min-width: 30px; border-radius: 50%;
+    background: var(--card2); display: flex; align-items: center;
+    justify-content: center; font-size: 16px; border: 1px solid var(--border);
+  }
+  .ai-msg-bubble {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 10px 14px; font-size: 14px;
+    line-height: 1.5; font-family: var(--font2); color: var(--text);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .ai-msg-user .ai-msg-bubble {
+    background: var(--blue); border-color: var(--blue-dark); color: #fff;
+  }
+  .ai-msg-bot .ai-msg-bubble.ai-error {
+    background: rgba(255,75,75,0.12); border-color: var(--red); color: var(--red);
+  }
+  .ai-typing {
+    display: flex; gap: 8px; align-items: center; padding: 0 14px 8px;
+  }
+  .ai-typing-dots { display: flex; gap: 4px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 10px 14px; }
+  .ai-typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--text2);
+    animation: aiTypingBounce 1.2s infinite ease-in-out;
+  }
+  .ai-typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .ai-typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes aiTypingBounce { 0%,60%,100%{ transform: translateY(0); opacity:0.5; } 30%{ transform: translateY(-4px); opacity:1; } }
+  .ai-input-bar {
+    position: fixed; bottom: 58px; left: 0; right: 0;
+    display: flex; gap: 8px; padding: 10px 14px;
+    background: var(--bg2); border-top: 1px solid var(--border); z-index: 200;
+  }
+  .ai-chat-input {
+    flex: 1; background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 10px 16px; color: var(--text);
+    font-family: var(--font2); font-size: 14px; outline: none;
+  }
+  .ai-chat-input:focus { border-color: var(--blue); }
+  .ai-send-btn {
+    width: 42px; height: 42px; border-radius: 50%; border: none;
+    background: var(--green); color: #fff; font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 0 var(--green-dark);
+  }
+  .ai-send-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--green-dark); }
+  .ai-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ======= LESSON SCREEN ======= */
+  #lessonScreen {
+    background: var(--bg);
+    padding-bottom: 20px;
+  }
+
+  .lesson-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .close-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 2px solid var(--border); background: transparent;
+    color: var(--text2); font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .progress-bar-wrap {
+    flex: 1; height: 12px; background: var(--card2);
+    border-radius: 6px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--green);
+    border-radius: 6px; transition: width 0.4s ease;
+  }
+  .hearts { font-size: 20px; display: flex; gap: 4px; }
+
+  .lesson-content { padding: 24px 20px; flex: 1; }
+
+  .question-type {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    color: var(--text2); text-transform: uppercase;
+    font-family: var(--font2); margin-bottom: 8px;
+  }
+  .question-text {
+    font-size: 22px; font-weight: 700;
+    line-height: 1.3; margin-bottom: 8px;
+  }
+  .question-hint {
+    font-size: 14px; color: var(--text2);
+    font-family: var(--font2); margin-bottom: 28px;
+  }
+
+  /* Character display */
+  .char-display {
+    background: var(--card); border-radius: 20px;
+    padding: 24px; margin-bottom: 28px;
+    display: flex; align-items: center; gap: 16px;
+    border: 1px solid var(--border);
+  }
+  .char-avatar { font-size: 52px; }
+  .char-bubble {
+    flex: 1; background: var(--card2);
+    border-radius: 14px; padding: 14px;
+    position: relative; border: 1px solid var(--border);
+  }
+  .char-bubble::before {
+    content: '';
+    position: absolute; left: -10px; top: 50%;
+    transform: translateY(-50%);
+    border: 8px solid transparent;
+    border-right-color: var(--border);
+  }
+  .char-bubble::after {
+    content: '';
+    position: absolute; left: -8px; top: 50%;
+    transform: translateY(-50%);
+    border: 7px solid transparent;
+    border-right-color: var(--card2);
+  }
+  .bubble-german { font-size: 22px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .bubble-hindi { font-size: 14px; color: var(--text2); font-family: var(--font2); }
+
+  /* Options */
+  .options-grid {
+    display: grid; gap: 12px;
+  }
+  .options-grid.two-col { grid-template-columns: 1fr 1fr; }
+  .option-btn {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 14px; padding: 14px 16px;
+    color: var(--text); font-size: 15px; font-weight: 600;
+    font-family: var(--font); cursor: pointer;
+    text-align: left; transition: all 0.15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .option-btn:active { transform: scale(0.97); }
+  .option-btn.selected { border-color: var(--blue); background: rgba(28,176,246,0.1); }
+  .option-btn.correct { border-color: var(--green); background: rgba(88,204,2,0.1); }
+  .option-btn.wrong { border-color: var(--red); background: rgba(255,75,75,0.1); }
+  .option-emoji { font-size: 22px; }
+  .option-text { flex: 1; }
+  .option-sub { font-size: 11px; color: var(--text2); font-family: var(--font2); font-weight: 500; }
+
+  /* Word bank */
+  .word-bank-area {
+    min-height: 60px; background: var(--card);
+    border-radius: 14px; padding: 12px;
+    border: 2px dashed var(--border);
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 16px; align-content: flex-start;
+  }
+  .word-bank {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 20px;
+  }
+  .word-chip {
+    background: var(--card2); border: 2px solid var(--border);
+    border-radius: 10px; padding: 8px 14px;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+    font-family: var(--font);
+  }
+  .word-chip:active { transform: scale(0.95); }
+  .word-chip.used { opacity: 0.3; pointer-events: none; }
+  .word-chip.in-answer { background: var(--blue); border-color: var(--blue-dark); color: #fff; }
+
+  /* Type input */
+  .type-input {
+    width: 100%; background: var(--card);
+    border: 2px solid var(--border); border-radius: 14px;
+    padding: 14px 16px; color: var(--text);
+    font-size: 18px; font-family: var(--font);
+    font-weight: 600; margin-bottom: 20px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .type-input:focus { border-color: var(--blue); }
+
+  /* Feedback */
+  .feedback-panel {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 20px 20px 32px;
+    border-top: 3px solid;
+    transition: all 0.3s;
+    z-index: 150;
+  }
+  .feedback-panel.correct { background: rgba(88,204,2,0.15); border-color: var(--green); }
+  .feedback-panel.wrong { background: rgba(255,75,75,0.1); border-color: var(--red); }
+  .feedback-title {
+    font-size: 18px; font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .feedback-panel.correct .feedback-title { color: var(--green); }
+  .feedback-panel.wrong .feedback-title { color: var(--red); }
+  .feedback-answer { font-size: 13px; color: var(--text2); font-family: var(--font2); margin-bottom: 14px; }
+  .continue-btn {
+    width: 100%; padding: 16px;
+    border: none; border-radius: 14px;
+    font-size: 16px; font-weight: 800;
+    font-family: var(--font); cursor: pointer;
+    letter-spacing: 0.5px;
+  }
+  .feedback-panel.correct .continue-btn { background: var(--green); color: #fff; box-shadow: 0 4px 0 var(--green-dark); }
+  .feedback-panel.wrong .continue-btn { background: var(--red); color: #fff; box-shadow: 0 4px 0 #cc0000; }
+
+  .check-btn {
+    width: 100%; padding: 16px;
+    background: var(--green); border: none;
+    border-radius: 14px; color: #fff;
+    font-size: 16px; font-weight: 800;
+    font-family: var(--font); cursor: pointer;
+    box-shadow: 0 4px 0 var(--green-dark);
+    letter-spacing: 0.5px; transition: transform 0.1s, box-shadow 0.1s;
+    margin-top: 8px;
+  }
+  .check-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--green-dark); }
+  .check-btn:disabled { background: var(--card2); color: var(--text2); box-shadow: none; cursor: not-allowed; }
+
+  /* ======= COMPLETE SCREEN ======= */
+  #completeScreen {
+    align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at center, #1a3a2a 0%, var(--bg) 70%);
+    padding: 40px 24px; text-align: center;
+  }
+  .complete-icon { font-size: 80px; margin-bottom: 20px; animation: bounce 0.6s ease 0.3s both; }
+  @keyframes bounce {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .complete-title { font-size: 32px; font-weight: 800; color: var(--green); margin-bottom: 8px; }
+  .complete-sub { font-size: 16px; color: var(--text2); font-family: var(--font2); margin-bottom: 36px; }
+
+  .stats-row {
+    display: flex; gap: 16px; width: 100%;
+    max-width: 340px; margin-bottom: 36px;
+  }
+  .stat-card {
+    flex: 1; background: var(--card);
+    border-radius: 16px; padding: 16px;
+    border: 1px solid var(--border); text-align: center;
+  }
+  .stat-card .sval { font-size: 28px; font-weight: 800; color: var(--green); }
+  .stat-card .slbl { font-size: 11px; color: var(--text2); font-family: var(--font2); font-weight: 600; }
+
+  .continue-home-btn {
+    width: 100%; max-width: 340px;
+    background: var(--green); border: none;
+    border-radius: 16px; padding: 18px;
+    font-size: 18px; font-weight: 800;
+    color: #fff; font-family: var(--font);
+    cursor: pointer;
+    box-shadow: 0 6px 0 var(--green-dark), 0 8px 20px rgba(88,204,2,0.3);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  .continue-home-btn:active { transform: translateY(3px); box-shadow: 0 3px 0 var(--green-dark); }
+
+  /* ======= VOCAB SCREEN ======= */
+  #vocabScreen { padding-bottom: 80px; }
+  .vocab-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+  .vocab-card {
+    background: var(--card); border-radius: 16px;
+    border: 1px solid var(--border); padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .vocab-card:active { transform: scale(0.98); }
+  .vocab-emoji { font-size: 36px; }
+  .vocab-text { flex: 1; }
+  .vocab-german { font-size: 18px; font-weight: 700; color: var(--blue); }
+  .vocab-hindi { font-size: 14px; color: var(--text2); font-family: var(--font2); }
+  .vocab-level { font-size: 11px; color: var(--text2); font-family: var(--font2); font-weight: 700; }
+  .vocab-badge {
+    font-size: 11px; font-weight: 700;
+    padding: 4px 10px; border-radius: 20px;
+    font-family: var(--font2);
+  }
+  .vocab-badge.new { background: rgba(28,176,246,0.2); color: var(--blue); border: 1px solid var(--blue); }
+  .vocab-badge.learned { background: rgba(88,204,2,0.2); color: var(--green); border: 1px solid var(--green); }
+
+  /* ======= PROFILE SCREEN ======= */
+  #profileScreen { padding-bottom: 80px; }
+  .profile-header {
+    padding: 32px 20px 24px; text-align: center;
+    background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .avatar-big { font-size: 64px; margin-bottom: 8px; }
+  .profile-name { font-size: 22px; font-weight: 800; }
+  .profile-join { font-size: 13px; color: var(--text2); font-family: var(--font2); }
+  .profile-stats { display: flex; padding: 20px; gap: 12px; }
+  .pstat {
+    flex: 1; background: var(--card);
+    border-radius: 14px; padding: 16px;
+    border: 1px solid var(--border); text-align: center;
+  }
+  .pstat .pv { font-size: 24px; font-weight: 800; color: var(--yellow); }
+  .pstat .pl { font-size: 11px; color: var(--text2); font-family: var(--font2); }
+  .achievements { padding: 0 20px; }
+  .ach-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .ach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ach-card {
+    background: var(--card); border-radius: 14px;
+    padding: 16px; border: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .ach-icon { font-size: 32px; }
+  .ach-name { font-size: 13px; font-weight: 700; text-align: center; }
+  .ach-desc { font-size: 11px; color: var(--text2); font-family: var(--font2); text-align: center; }
+  .ach-card.locked { filter: grayscale(1) opacity(0.5); }
+
+  /* XP animation */
+  .xp-popup {
+    position: fixed; top: 20%; left: 50%;
+    transform: translateX(-50%);
+    background: var(--yellow); color: #000;
+    border-radius: 20px; padding: 8px 20px;
+    font-size: 18px; font-weight: 800;
+    font-family: var(--font); z-index: 300;
+    animation: xpFloat 1.5s ease forwards;
+    pointer-events: none;
+  }
+  @keyframes xpFloat {
+    0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    20% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px); }
+  }
+
+  /* Confetti */
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px;
+    border-radius: 2px; pointer-events: none;
+    animation: confettiFall 1.5s ease forwards;
+    z-index: 400;
+  }
+  @keyframes confettiFall {
+    0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(80vh) rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== LOGIN SCREEN ====== -->
+<div id="loginScreen" class="screen active">
+  <div class="login-logo">🇩🇪</div>
+  <div class="login-title">Apeion<br><span>Language Learners</span></div>
+  <div class="login-sub">Hindi se German sikhein<br>aur apna progress hamesha save rakhein!</div>
+
+  <div class="login-card">
+    <div class="login-card-title">🚀 Sign In Karo</div>
+    <div class="login-card-sub">Apna progress kabhi mat khoye</div>
+
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Naam + PIN se Account Banao 🔐
+    </button>
+
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-text">ya phir</div>
+      <div class="divider-line"></div>
+    </div>
+
+    <button class="guest-btn" onclick="signInAsGuest()">
+      👤 Guest ke roop mein khelo
+    </button>
+  </div>
+  <div class="login-footer">Sign in karke aap Google ka data Google ke saath share karte hain</div>
+</div>
+
+<!-- ====== HOME SCREEN ====== -->
+<div id="homeScreen" class="screen">
+  <div class="flag-container">
+    <div class="flag">🇮🇳</div>
+    <div class="arrow-icon">→</div>
+    <div class="flag">🇩🇪</div>
+  </div>
+  <h1 class="app-title">Apeion<br><span>Language Learners</span></h1>
+  <p class="app-subtitle">Hindi se German sikhein<br>bilkul free, bilkul aasaan!</p>
+
+  <div class="streak-bar">
+    <div class="streak-icon">🔥</div>
+    <div class="streak-info">
+      <div class="streak-label">Aaj ki streak</div>
+      <div class="streak-value" id="homeStreak">0 din</div>
+    </div>
+    <div class="xp-badge" id="homeXP">0 XP</div>
+  </div>
+
+  <button class="start-btn" onclick="goTo('pathScreen')">
+    🚀 Seekhna Shuru Karo!
+  </button>
+  <br><br>
+  <button class="start-btn" style="background:#1CB0F6; box-shadow: 0 6px 0 #0a91d1; max-width:340px; width:100%; font-size:15px; padding:14px;" onclick="goTo('vocabScreen')">
+    📚 Sab Words Dekho
+  </button>
+</div>
+
+<!-- ====== PATH SCREEN ====== -->
+<div id="pathScreen" class="screen">
+  <div class="top-bar">
+    <div class="top-bar-title">🇩🇪 German Path</div>
+    <div class="top-bar-stats">
+      <div class="stat-pill"><span class="icon">🔥</span><span id="pathStreak">0</span></div>
+      <div class="stat-pill"><span class="icon">⭐</span><span id="pathXP">0</span></div>
+      <div class="user-avatar-mini" id="pathUserAvatar" onclick="goTo('profileScreen')">👤</div>
+    </div>
+  </div>
+
+  <div class="path-container" id="pathContainer"></div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="goTo('pathScreen')">🏠<span>Ghar</span></button>
+    <button class="nav-btn" onclick="goTo('vocabScreen')">📚<span>Words</span></button>
+    <button class="nav-btn" onclick="goTo('aiTeacherScreen')">🎓<span>AI Sir</span></button>
+    <button class="nav-btn" onclick="goTo('profileScreen')">👤<span>Profile</span></button>
+  </div>
+</div>
+
+<!-- ====== LESSON SCREEN ====== -->
+<div id="lessonScreen" class="screen">
+  <div class="lesson-header">
+    <button class="close-btn" onclick="closeLesson()">✕</button>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="hearts" id="heartsDisplay">❤️❤️❤️</div>
+  </div>
+  <div class="lesson-content" id="lessonContent"></div>
+</div>
+
+<!-- ====== COMPLETE SCREEN ====== -->
+<div id="completeScreen" class="screen">
+  <div class="complete-icon">🏆</div>
+  <div class="complete-title">Shabash! शाबाश!</div>
+  <div class="complete-sub">Aapne lesson complete kiya!</div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="sval" id="cXP">+20</div>
+      <div class="slbl">XP Mile</div>
+    </div>
+    <div class="stat-card">
+      <div class="sval" id="cAccuracy">100%</div>
+      <div class="slbl">Accuracy</div>
+    </div>
+    <div class="stat-card">
+      <div class="sval" id="cTime">0s</div>
+      <div class="slbl">Time</div>
+    </div>
+  </div>
+
+  <button class="continue-home-btn" onclick="finishLesson()">
+    🏠 Path Par Wapas Jao
+  </button>
+</div>
+
+<!-- ====== VOCAB SCREEN ====== -->
+<div id="vocabScreen" class="screen">
+  <div class="top-bar">
+    <button class="close-btn" onclick="goTo('pathScreen')">✕</button>
+    <div class="top-bar-title">📚 Mera Shabd Bhandar</div>
+    <div></div>
+  </div>
+
+  <div class="vocab-list" id="vocabList"></div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="goTo('pathScreen')">🏠<span>Ghar</span></button>
+    <button class="nav-btn active" onclick="goTo('vocabScreen')">📚<span>Words</span></button>
+    <button class="nav-btn" onclick="goTo('aiTeacherScreen')">🎓<span>AI Sir</span></button>
+    <button class="nav-btn" onclick="goTo('profileScreen')">👤<span>Profile</span></button>
+  </div>
+</div>
+
+<!-- ====== PROFILE SCREEN ====== -->
+<div id="profileScreen" class="screen">
+  <div class="top-bar">
+    <button class="close-btn" onclick="goTo('pathScreen')">✕</button>
+    <div class="top-bar-title">👤 Mera Profile</div>
+    <div></div>
+  </div>
+
+  <div class="profile-header">
+    <div class="avatar-big" id="profileAvatarBig">🦊</div>
+    <div class="profile-name" id="profileName">Apeion Learner</div>
+    <div class="profile-join" id="profileEmail">Guest User</div>
+    <button onclick="signOut()" style="margin-top:12px; background:rgba(255,75,75,0.15); border:1px solid var(--red); border-radius:20px; padding:6px 18px; color:var(--red); font-size:13px; font-weight:700; font-family:var(--font); cursor:pointer;">
+      🚪 Sign Out
+    </button>
+  </div>
+
+  <div class="profile-stats">
+    <div class="pstat"><div class="pv" id="pXP">0</div><div class="pl">Kul XP</div></div>
+    <div class="pstat"><div class="pv" id="pStreak">0</div><div class="pl">Streak Dino</div></div>
+    <div class="pstat"><div class="pv" id="pLessons">0</div><div class="pl">Lessons</div></div>
+  </div>
+
+  <div class="achievements">
+    <div class="ach-title">🏅 Achievements</div>
+    <div class="ach-grid" id="achGrid"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="goTo('pathScreen')">🏠<span>Ghar</span></button>
+    <button class="nav-btn" onclick="goTo('vocabScreen')">📚<span>Words</span></button>
+    <button class="nav-btn" onclick="goTo('aiTeacherScreen')">🎓<span>AI Sir</span></button>
+    <button class="nav-btn active" onclick="goTo('profileScreen')">👤<span>Profile</span></button>
+  </div>
+</div>
+
+<!-- ====== AI TEACHER SCREEN ====== -->
+<div id="aiTeacherScreen" class="screen">
+  <div class="top-bar">
+    <button class="close-btn" onclick="goTo('pathScreen')">✕</button>
+    <div class="top-bar-title">🎓 AI Teacher Sonar</div>
+    <div></div>
+  </div>
+
+  <div class="ai-chat-area" id="aiChatArea">
+    <div class="ai-msg ai-msg-bot">
+      <div class="ai-msg-avatar">🤖</div>
+      <div class="ai-msg-bubble">Hallo! 👋 Main Sonar hoon, tumhara AI German teacher. Mujhse German mein baat karo, translation poochho, grammar samjho, ya practice karo. Kuch bhi pucho! 🇩🇪</div>
+    </div>
+  </div>
+
+  <div class="ai-typing" id="aiTyping" style="display:none;">
+    <div class="ai-msg-avatar">🤖</div>
+    <div class="ai-typing-dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <div class="ai-input-bar">
+    <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="German ya Hindi mein message likho..." onkeydown="if(event.key==='Enter')sendAIMessage()">
+    <button class="ai-send-btn" onclick="sendAIMessage()">➤</button>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="goTo('pathScreen')">🏠<span>Ghar</span></button>
+    <button class="nav-btn" onclick="goTo('vocabScreen')">📚<span>Words</span></button>
+    <button class="nav-btn active" onclick="goTo('aiTeacherScreen')">🎓<span>AI Sir</span></button>
+    <button class="nav-btn" onclick="goTo('profileScreen')">👤<span>Profile</span></button>
+  </div>
+</div>
+
+<script>
+// ======================================================
+// DATA
+// ======================================================
+
+const VOCAB = [
+  // Basic greetings
+  { id:'v1', german:'Hallo', hindi:'नमस्ते / Hello', emoji:'👋', level:1, category:'Abhivaadan' },
+  { id:'v2', german:'Tschüss', hindi:'अलविदा / Bye', emoji:'👋', level:1, category:'Abhivaadan' },
+  { id:'v3', german:'Danke', hindi:'धन्यवाद / Shukriya', emoji:'🙏', level:1, category:'Abhivaadan' },
+  { id:'v4', german:'Bitte', hindi:'कृपया / Please', emoji:'🤲', level:1, category:'Abhivaadan' },
+  { id:'v5', german:'Ja', hindi:'हाँ / Haan', emoji:'✅', level:1, category:'Abhivaadan' },
+  { id:'v6', german:'Nein', hindi:'नहीं / Nahi', emoji:'❌', level:1, category:'Abhivaadan' },
+
+  // Numbers
+  { id:'v7', german:'Eins', hindi:'एक / Ek', emoji:'1️⃣', level:2, category:'Ginti' },
+  { id:'v8', german:'Zwei', hindi:'दो / Do', emoji:'2️⃣', level:2, category:'Ginti' },
+  { id:'v9', german:'Drei', hindi:'तीन / Teen', emoji:'3️⃣', level:2, category:'Ginti' },
+  { id:'v10', german:'Vier', hindi:'चार / Chaar', emoji:'4️⃣', level:2, category:'Ginti' },
+  { id:'v11', german:'Fünf', hindi:'पाँच / Paanch', emoji:'5️⃣', level:2, category:'Ginti' },
+  { id:'v12', german:'Zehn', hindi:'दस / Das', emoji:'🔟', level:2, category:'Ginti' },
+
+  // Colors
+  { id:'v13', german:'Rot', hindi:'लाल / Laal', emoji:'🔴', level:3, category:'Rang' },
+  { id:'v14', german:'Blau', hindi:'नीला / Neela', emoji:'🔵', level:3, category:'Rang' },
+  { id:'v15', german:'Grün', hindi:'हरा / Hara', emoji:'🟢', level:3, category:'Rang' },
+  { id:'v16', german:'Gelb', hindi:'पीला / Peela', emoji:'🟡', level:3, category:'Rang' },
+  { id:'v17', german:'Schwarz', hindi:'काला / Kaala', emoji:'⚫', level:3, category:'Rang' },
+  { id:'v18', german:'Weiß', hindi:'सफ़ेद / Safed', emoji:'⚪', level:3, category:'Rang' },
+
+  // Animals
+  { id:'v19', german:'Hund', hindi:'कुत्ता / Kutta', emoji:'🐶', level:4, category:'Jaanvar' },
+  { id:'v20', german:'Katze', hindi:'बिल्ली / Billi', emoji:'🐱', level:4, category:'Jaanvar' },
+  { id:'v21', german:'Vogel', hindi:'पक्षी / Pakshi', emoji:'🐦', level:4, category:'Jaanvar' },
+  { id:'v22', german:'Fisch', hindi:'मछली / Machli', emoji:'🐟', level:4, category:'Jaanvar' },
+
+  // Food
+  { id:'v23', german:'Wasser', hindi:'पानी / Paani', emoji:'💧', level:5, category:'Khaana' },
+  { id:'v24', german:'Brot', hindi:'रोटी / Roti', emoji:'🍞', level:5, category:'Khaana' },
+  { id:'v25', german:'Apfel', hindi:'सेब / Seb', emoji:'🍎', level:5, category:'Khaana' },
+  { id:'v26', german:'Milch', hindi:'दूध / Doodh', emoji:'🥛', level:5, category:'Khaana' },
+  { id:'v27', german:'Ei', hindi:'अंडा / Anda', emoji:'🥚', level:5, category:'Khaana' },
+
+  // Family
+  { id:'v28', german:'Mutter', hindi:'माँ / Maa', emoji:'👩', level:6, category:'Parivaar' },
+  { id:'v29', german:'Vater', hindi:'पिता / Pita', emoji:'👨', level:6, category:'Parivaar' },
+  { id:'v30', german:'Kind', hindi:'बच्चा / Bachcha', emoji:'👶', level:6, category:'Parivaar' },
+  { id:'v31', german:'Bruder', hindi:'भाई / Bhai', emoji:'👦', level:6, category:'Parivaar' },
+  { id:'v32', german:'Schwester', hindi:'बहन / Behen', emoji:'👧', level:6, category:'Parivaar' },
+
+  { id:'v33', german:'Kopf', hindi:'सिर / Sir', emoji:'🧠', level:7, category:'Sharir' },
+  { id:'v34', german:'Auge', hindi:'आँख / Aankh', emoji:'👁️', level:7, category:'Sharir' },
+  { id:'v35', german:'Hand', hindi:'हाथ / Haath', emoji:'✋', level:7, category:'Sharir' },
+  { id:'v36', german:'Fuß', hindi:'पैर / Pair', emoji:'🦶', level:7, category:'Sharir' },
+  { id:'v37', german:'Nase', hindi:'नाक / Naak', emoji:'👃', level:7, category:'Sharir' },
+  { id:'v38', german:'Mund', hindi:'मुँह / Muh', emoji:'👄', level:7, category:'Sharir' },
+
+  { id:'v39', german:'Hemd', hindi:'कमीज़ / Kameez', emoji:'👔', level:8, category:'Kapde' },
+  { id:'v40', german:'Hose', hindi:'पैंट / Pant', emoji:'👖', level:8, category:'Kapde' },
+  { id:'v41', german:'Schuhe', hindi:'जूते / Joote', emoji:'👟', level:8, category:'Kapde' },
+  { id:'v42', german:'Kleid', hindi:'ड्रेस / Dress', emoji:'👗', level:8, category:'Kapde' },
+  { id:'v43', german:'Mütze', hindi:'टोपी / Topi', emoji:'🧢', level:8, category:'Kapde' },
+
+  { id:'v44', german:'Sonne', hindi:'सूरज / Suraj', emoji:'☀️', level:9, category:'Mausam' },
+  { id:'v45', german:'Regen', hindi:'बारिश / Baarish', emoji:'🌧️', level:9, category:'Mausam' },
+  { id:'v46', german:'Schnee', hindi:'बर्फ़ / Barf', emoji:'❄️', level:9, category:'Mausam' },
+  { id:'v47', german:'Wind', hindi:'हवा / Hawa', emoji:'💨', level:9, category:'Mausam' },
+  { id:'v48', german:'Wolke', hindi:'बादल / Baadal', emoji:'☁️', level:9, category:'Mausam' },
+
+  { id:'v49', german:'Morgen', hindi:'सुबह / Subah', emoji:'🌅', level:10, category:'Samay' },
+  { id:'v50', german:'Abend', hindi:'शाम / Shaam', emoji:'🌆', level:10, category:'Samay' },
+  { id:'v51', german:'Nacht', hindi:'रात / Raat', emoji:'🌙', level:10, category:'Samay' },
+  { id:'v52', german:'Mittag', hindi:'दोपहर / Dopahar', emoji:'🌞', level:10, category:'Samay' },
+  { id:'v53', german:'Uhr', hindi:'घड़ी / Ghadi', emoji:'🕐', level:10, category:'Samay' },
+
+  { id:'v54', german:'Montag', hindi:'सोमवार / Somvaar', emoji:'📅', level:11, category:'Din' },
+  { id:'v55', german:'Freitag', hindi:'शुक्रवार / Shukravaar', emoji:'📅', level:11, category:'Din' },
+  { id:'v56', german:'Sonntag', hindi:'रविवार / Ravivaar', emoji:'📅', level:11, category:'Din' },
+  { id:'v57', german:'Woche', hindi:'हफ़्ता / Hafta', emoji:'🗓️', level:11, category:'Din' },
+  { id:'v58', german:'Heute', hindi:'आज / Aaj', emoji:'📆', level:11, category:'Din' },
+
+  { id:'v59', german:'Lehrer', hindi:'शिक्षक / Shikshak', emoji:'👨‍🏫', level:12, category:'Pesha' },
+  { id:'v60', german:'Arzt', hindi:'डॉक्टर / Doctor', emoji:'👨‍⚕️', level:12, category:'Pesha' },
+  { id:'v61', german:'Polizist', hindi:'पुलिस / Police', emoji:'👮', level:12, category:'Pesha' },
+  { id:'v62', german:'Koch', hindi:'रसोइया / Rasoiya', emoji:'👨‍🍳', level:12, category:'Pesha' },
+  { id:'v63', german:'Bauer', hindi:'किसान / Kisaan', emoji:'👨‍🌾', level:12, category:'Pesha' },
+
+  { id:'v64', german:'Schule', hindi:'स्कूल / School', emoji:'🏫', level:13, category:'Jagah' },
+  { id:'v65', german:'Haus', hindi:'घर / Ghar', emoji:'🏠', level:13, category:'Jagah' },
+  { id:'v66', german:'Markt', hindi:'बाज़ार / Bazaar', emoji:'🏪', level:13, category:'Jagah' },
+  { id:'v67', german:'Krankenhaus', hindi:'अस्पताल / Aspataal', emoji:'🏥', level:13, category:'Jagah' },
+  { id:'v68', german:'Park', hindi:'पार्क / Park', emoji:'🌳', level:13, category:'Jagah' },
+
+  { id:'v69', german:'gehen', hindi:'जाना / Jaana', emoji:'🚶', level:14, category:'Kriya' },
+  { id:'v70', german:'essen', hindi:'खाना / Khaana', emoji:'🍽️', level:14, category:'Kriya' },
+  { id:'v71', german:'trinken', hindi:'पीना / Peena', emoji:'🥤', level:14, category:'Kriya' },
+  { id:'v72', german:'schlafen', hindi:'सोना / Sona', emoji:'😴', level:14, category:'Kriya' },
+  { id:'v73', german:'spielen', hindi:'खेलना / Khelna', emoji:'⚽', level:14, category:'Kriya' },
+
+  { id:'v74', german:'groß', hindi:'बड़ा / Bada', emoji:'📏', level:15, category:'Visheshan' },
+  { id:'v75', german:'klein', hindi:'छोटा / Chota', emoji:'🤏', level:15, category:'Visheshan' },
+  { id:'v76', german:'gut', hindi:'अच्छा / Accha', emoji:'👍', level:15, category:'Visheshan' },
+  { id:'v77', german:'schlecht', hindi:'बुरा / Bura', emoji:'👎', level:15, category:'Visheshan' },
+  { id:'v78', german:'schön', hindi:'सुंदर / Sundar', emoji:'🌸', level:15, category:'Visheshan' },
+
+  { id:'v79', german:'Auto', hindi:'कार / Car', emoji:'🚗', level:16, category:'Sawari' },
+  { id:'v80', german:'Bus', hindi:'बस / Bus', emoji:'🚌', level:16, category:'Sawari' },
+  { id:'v81', german:'Zug', hindi:'ट्रेन / Train', emoji:'🚆', level:16, category:'Sawari' },
+  { id:'v82', german:'Fahrrad', hindi:'साइकिल / Cycle', emoji:'🚲', level:16, category:'Sawari' },
+  { id:'v83', german:'Flugzeug', hindi:'हवाई जहाज़ / Hawai Jahaz', emoji:'✈️', level:16, category:'Sawari' },
+];
+
+// ======================================================
+// LESSONS DATA
+// ======================================================
+
+const LESSONS = [
+  {
+    id: 0, title: 'Namaste!', icon: '👋', section: '🌱 Shuruaat - Beginners',
+    questions: [
+      {
+        type: 'translate',
+        qtype: 'Anuvad Karo (Hindi → German)',
+        question: '"नमस्ते" ko German mein kya kehte hain?',
+        hint: 'Kisi se milne par kya kehte hain',
+        charEmoji: '🤖',
+        charGerman: 'Hallo!',
+        charHindi: 'Yahi seekhna hai!',
+        options: [
+          { text:'Hallo', sub:'नमस्ते', emoji:'👋', correct:true },
+          { text:'Danke', sub:'धन्यवाद', emoji:'🙏', correct:false },
+          { text:'Tschüss', sub:'अलविदा', emoji:'👋', correct:false },
+          { text:'Bitte', sub:'कृपया', emoji:'🤲', correct:false },
+        ]
+      },
+      {
+        type: 'translate',
+        qtype: 'Anuvad Karo (German → Hindi)',
+        question: '"Danke" ka Hindi mein matlab kya hai?',
+        hint: 'Koi kuch de tab kya kehte hain?',
+        charEmoji: '🤖',
+        charGerman: 'Danke!',
+        charHindi: 'Iska matlab jaano!',
+        options: [
+          { text:'अलविदा', sub:'Tschüss', emoji:'👋', correct:false },
+          { text:'धन्यवाद', sub:'Shukriya', emoji:'🙏', correct:true },
+          { text:'हाँ', sub:'Ja', emoji:'✅', correct:false },
+          { text:'कृपया', sub:'Please', emoji:'🤲', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank',
+        qtype: 'Sentence Banao',
+        question: 'German mein "Haan" kaise bolenge? Sahi word chunno:',
+        hint: 'Agreement mein kya kehte hain',
+        charEmoji: '🤖',
+        charGerman: 'Ja!',
+        charHindi: '"Haan" German mein',
+        words: ['Ja', 'Nein', 'Hallo', 'Danke'],
+        answer: 'Ja'
+      },
+      {
+        type: 'translate',
+        qtype: 'Anuvad Karo',
+        question: '"नहीं" ko German mein bolte hain:',
+        hint: 'Mana karna ho tab',
+        charEmoji: '🤖',
+        charGerman: 'Nein!',
+        charHindi: '"Nahi" bolne ka tarika',
+        options: [
+          { text:'Ja', sub:'हाँ', emoji:'✅', correct:false },
+          { text:'Nein', sub:'नहीं', emoji:'❌', correct:true },
+          { text:'Bitte', sub:'कृपया', emoji:'🤲', correct:false },
+          { text:'Tschüss', sub:'अलविदा', emoji:'👋', correct:false },
+        ]
+      },
+      {
+        type: 'translate',
+        qtype: 'Final Question',
+        question: '"Tschüss" ka matlab kya hota hai?',
+        hint: 'Jaate waqt kya kehte hain',
+        charEmoji: '🤖',
+        charGerman: 'Tschüss!',
+        charHindi: 'Alvida kehna',
+        options: [
+          { text:'नमस्ते', sub:'Hello', emoji:'👋', correct:false },
+          { text:'धन्यवाद', sub:'Danke', emoji:'🙏', correct:false },
+          { text:'अलविदा', sub:'Goodbye', emoji:'🚶', correct:true },
+          { text:'हाँ', sub:'Yes', emoji:'✅', correct:false },
+        ]
+      }
+    ]
+  },
+  {
+    id: 1, title: 'Ginti', icon: '🔢', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Ginti',
+        question: '"एक" ko German mein kya kehte hain?',
+        hint: '1 = ?',
+        charEmoji: '🤖', charGerman: 'Eins!', charHindi: '1 German mein',
+        options: [
+          { text:'Zwei', sub:'दो', emoji:'2️⃣', correct:false },
+          { text:'Eins', sub:'एक', emoji:'1️⃣', correct:true },
+          { text:'Drei', sub:'तीन', emoji:'3️⃣', correct:false },
+          { text:'Vier', sub:'चार', emoji:'4️⃣', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Ginti',
+        question: '"Drei" ka matlab kya hai?',
+        hint: 'Teen → ?',
+        charEmoji: '🤖', charGerman: 'Drei!', charHindi: 'Teen German mein',
+        options: [
+          { text:'दो', sub:'Zwei', emoji:'2️⃣', correct:false },
+          { text:'चार', sub:'Vier', emoji:'4️⃣', correct:false },
+          { text:'तीन', sub:'Teen', emoji:'3️⃣', correct:true },
+          { text:'पाँच', sub:'Fünf', emoji:'5️⃣', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"पाँच" ke liye German word dhundho:',
+        hint: '5 = ?',
+        charEmoji: '🤖', charGerman: 'Fünf!', charHindi: 'Paanch German mein',
+        words: ['Eins','Zwei','Fünf','Zehn'],
+        answer: 'Fünf'
+      },
+      {
+        type: 'translate', qtype: 'German Ginti',
+        question: '"Zehn" kitna hota hai?',
+        hint: 'Sabse bada number aaj ka',
+        charEmoji: '🤖', charGerman: 'Zehn!', charHindi: 'Das German mein',
+        options: [
+          { text:'पाँच', sub:'Fünf', emoji:'5️⃣', correct:false },
+          { text:'दो', sub:'Zwei', emoji:'2️⃣', correct:false },
+          { text:'दस', sub:'Das', emoji:'🔟', correct:true },
+          { text:'तीन', sub:'Drei', emoji:'3️⃣', correct:false },
+        ]
+      }
+    ]
+  },
+  {
+    id: 2, title: 'Rang', icon: '🎨', section: '🌿 Beginners - Level 2',
+    questions: [
+      {
+        type: 'translate', qtype: 'German Rang',
+        question: '"लाल" rang ko German mein kya kehte hain?',
+        hint: 'Red = ?',
+        charEmoji: '🤖', charGerman: 'Rot!', charHindi: 'Laal German mein',
+        options: [
+          { text:'Blau', sub:'नीला', emoji:'🔵', correct:false },
+          { text:'Rot', sub:'लाल', emoji:'🔴', correct:true },
+          { text:'Grün', sub:'हरा', emoji:'🟢', correct:false },
+          { text:'Gelb', sub:'पीला', emoji:'🟡', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Rang',
+        question: '"Grün" ka matlab kya hai?',
+        hint: 'Ped paudhe kis rang ke hote hain?',
+        charEmoji: '🤖', charGerman: 'Grün!', charHindi: 'Ped ka rang',
+        options: [
+          { text:'नीला', sub:'Blau', emoji:'🔵', correct:false },
+          { text:'काला', sub:'Schwarz', emoji:'⚫', correct:false },
+          { text:'हरा', sub:'Green', emoji:'🟢', correct:true },
+          { text:'पीला', sub:'Gelb', emoji:'🟡', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"काला" rang ke liye German word:',
+        hint: 'Black = ?',
+        charEmoji: '🤖', charGerman: 'Schwarz!', charHindi: 'Kaala German mein',
+        words: ['Weiß','Rot','Schwarz','Blau'],
+        answer: 'Schwarz'
+      },
+      {
+        type: 'translate', qtype: 'German Rang',
+        question: '"Weiß" ka matlab kya hota hai?',
+        hint: 'Doodh ya barf ka rang',
+        charEmoji: '🤖', charGerman: 'Weiß!', charHindi: 'Safed German mein',
+        options: [
+          { text:'पीला', sub:'Yellow', emoji:'🟡', correct:false },
+          { text:'सफ़ेद', sub:'White', emoji:'⚪', correct:true },
+          { text:'नीला', sub:'Blue', emoji:'🔵', correct:false },
+          { text:'हरा', sub:'Green', emoji:'🟢', correct:false },
+        ]
+      }
+    ]
+  },
+  {
+    id: 3, title: 'Jaanvar', icon: '🐾', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Jaanvar',
+        question: '"कुत्ता" ko German mein kya bolte hain?',
+        hint: 'Woh bhaukta hai',
+        charEmoji: '🤖', charGerman: 'Hund!', charHindi: 'Kutta German mein',
+        options: [
+          { text:'Katze', sub:'बिल्ली', emoji:'🐱', correct:false },
+          { text:'Hund', sub:'कुत्ता', emoji:'🐶', correct:true },
+          { text:'Vogel', sub:'पक्षी', emoji:'🐦', correct:false },
+          { text:'Fisch', sub:'मछली', emoji:'🐟', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Jaanvar',
+        question: '"Katze" ka matlab kya hai?',
+        hint: 'Meow karta hai',
+        charEmoji: '🤖', charGerman: 'Katze!', charHindi: 'Billi German mein',
+        options: [
+          { text:'कुत्ता', sub:'Hund', emoji:'🐶', correct:false },
+          { text:'पक्षी', sub:'Vogel', emoji:'🐦', correct:false },
+          { text:'बिल्ली', sub:'Cat', emoji:'🐱', correct:true },
+          { text:'मछली', sub:'Fisch', emoji:'🐟', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"मछली" ke liye German word dhundho:',
+        hint: 'Paani mein rehti hai',
+        charEmoji: '🤖', charGerman: 'Fisch!', charHindi: 'Machli German mein',
+        words: ['Vogel','Hund','Katze','Fisch'],
+        answer: 'Fisch'
+      }
+    ]
+  },
+  {
+    id: 4, title: 'Khaana', icon: '🍎', section: '🌳 Intermediate',
+    questions: [
+      {
+        type: 'translate', qtype: 'German Khaana',
+        question: '"पानी" ko German mein kya bolte hain?',
+        hint: 'Pyaas lagti hai tab peeते hain',
+        charEmoji: '🤖', charGerman: 'Wasser!', charHindi: 'Paani German mein',
+        options: [
+          { text:'Milch', sub:'दूध', emoji:'🥛', correct:false },
+          { text:'Brot', sub:'रोटी', emoji:'🍞', correct:false },
+          { text:'Wasser', sub:'पानी', emoji:'💧', correct:true },
+          { text:'Apfel', sub:'सेब', emoji:'🍎', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Khaana',
+        question: '"Brot" ka matlab kya hai?',
+        hint: 'Germans bahut yeh khaate hain',
+        charEmoji: '🤖', charGerman: 'Brot!', charHindi: 'Roti/Bread German mein',
+        options: [
+          { text:'पानी', sub:'Wasser', emoji:'💧', correct:false },
+          { text:'रोटी/Bread', sub:'Bread', emoji:'🍞', correct:true },
+          { text:'सेब', sub:'Apple', emoji:'🍎', correct:false },
+          { text:'दूध', sub:'Milk', emoji:'🥛', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"सेब" ke liye German word:',
+        hint: 'Red/Green fruit',
+        charEmoji: '🤖', charGerman: 'Apfel!', charHindi: 'Seb German mein',
+        words: ['Milch','Ei','Apfel','Wasser'],
+        answer: 'Apfel'
+      },
+      {
+        type: 'translate', qtype: 'German Khaana',
+        question: '"Milch" ka matlab kya hai?',
+        hint: 'Gaay se milta hai',
+        charEmoji: '🤖', charGerman: 'Milch!', charHindi: 'Doodh German mein',
+        options: [
+          { text:'सेब', sub:'Apple', emoji:'🍎', correct:false },
+          { text:'अंडा', sub:'Egg', emoji:'🥚', correct:false },
+          { text:'दूध', sub:'Milk', emoji:'🥛', correct:true },
+          { text:'पानी', sub:'Water', emoji:'💧', correct:false },
+        ]
+      }
+    ]
+  },
+  {
+    id: 5, title: 'Parivaar', icon: '👨‍👩‍👧', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Parivaar',
+        question: '"Mutter" ka matlab kya hai?',
+        hint: 'Ghar ki Lakshmi',
+        charEmoji: '🤖', charGerman: 'Mutter!', charHindi: 'Maa German mein',
+        options: [
+          { text:'पिता', sub:'Vater', emoji:'👨', correct:false },
+          { text:'माँ', sub:'Mother', emoji:'👩', correct:true },
+          { text:'भाई', sub:'Bruder', emoji:'👦', correct:false },
+          { text:'बहन', sub:'Schwester', emoji:'👧', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Parivaar',
+        question: '"पिता" ko German mein kya kehte hain?',
+        hint: 'Papa / Father',
+        charEmoji: '🤖', charGerman: 'Vater!', charHindi: 'Pita German mein',
+        options: [
+          { text:'Kind', sub:'बच्चा', emoji:'👶', correct:false },
+          { text:'Mutter', sub:'माँ', emoji:'👩', correct:false },
+          { text:'Vater', sub:'पिता', emoji:'👨', correct:true },
+          { text:'Bruder', sub:'भाई', emoji:'👦', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"भाई" ke liye German word dhundho:',
+        hint: 'Brother = ?',
+        charEmoji: '🤖', charGerman: 'Bruder!', charHindi: 'Bhai German mein',
+        words: ['Schwester','Kind','Bruder','Vater'],
+        answer: 'Bruder'
+      },
+      {
+        type: 'translate', qtype: 'German Parivaar',
+        question: '"Schwester" ka matlab kya hai?',
+        hint: 'Bhai ki woh',
+        charEmoji: '🤖', charGerman: 'Schwester!', charHindi: 'Behen German mein',
+        options: [
+          { text:'भाई', sub:'Bruder', emoji:'👦', correct:false },
+          { text:'बच्चा', sub:'Kind', emoji:'👶', correct:false },
+          { text:'माँ', sub:'Mutter', emoji:'👩', correct:false },
+          { text:'बहन', sub:'Sister', emoji:'👧', correct:true },
+        ]
+      }
+    ]
+  },
+  {
+    id: 6, title: 'Sharir', icon: '🧍', section: '🔥 Intermediate - Level 2',
+    questions: [
+      {
+        type: 'translate', qtype: 'German Sharir',
+        question: '"सिर" ko German mein kya kehte hain?',
+        hint: 'Sharir seekho',
+        charEmoji: '🤖', charGerman: 'Kopf!', charHindi: 'सिर German mein',
+        options: [
+          { text:'Auge', sub:'आँख', emoji:'👁️', correct:false },
+          { text:'Mund', sub:'मुँह', emoji:'👄', correct:false },
+          { text:'Kopf', sub:'सिर', emoji:'🧠', correct:true },
+          { text:'Nase', sub:'नाक', emoji:'👃', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Sharir',
+        question: '"Auge" ka matlab kya hai?',
+        hint: 'Sharir ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Auge!', charHindi: 'आँख German mein',
+        options: [
+          { text:'हाथ', sub:'Hand', emoji:'✋', correct:false },
+          { text:'मुँह', sub:'Mund', emoji:'👄', correct:false },
+          { text:'आँख', sub:'Auge', emoji:'👁️', correct:true },
+          { text:'पैर', sub:'Fuß', emoji:'🦶', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Sharir',
+        question: '"हाथ" ko German mein kya kehte hain?',
+        hint: 'Sharir seekho',
+        charEmoji: '🤖', charGerman: 'Hand!', charHindi: 'हाथ German mein',
+        options: [
+          { text:'Hand', sub:'हाथ', emoji:'✋', correct:true },
+          { text:'Auge', sub:'आँख', emoji:'👁️', correct:false },
+          { text:'Mund', sub:'मुँह', emoji:'👄', correct:false },
+          { text:'Kopf', sub:'सिर', emoji:'🧠', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"पैर" ke liye German word dhundho:',
+        hint: 'Sharir yaad hai?',
+        charEmoji: '🤖', charGerman: 'Fuß!', charHindi: 'पैर German mein',
+        words: ['Fuß','Hand','Auge','Nase'],
+        answer: 'Fuß'
+      }
+    ]
+  },
+  {
+    id: 7, title: 'Kapde', icon: '👕', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Kapde',
+        question: '"कमीज़" ko German mein kya kehte hain?',
+        hint: 'Kapde seekho',
+        charEmoji: '🤖', charGerman: 'Hemd!', charHindi: 'कमीज़ German mein',
+        options: [
+          { text:'Hose', sub:'पैंट', emoji:'👖', correct:false },
+          { text:'Hemd', sub:'कमीज़', emoji:'👔', correct:true },
+          { text:'Kleid', sub:'ड्रेस', emoji:'👗', correct:false },
+          { text:'Schuhe', sub:'जूते', emoji:'👟', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Kapde',
+        question: '"Hose" ka matlab kya hai?',
+        hint: 'Kapde ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Hose!', charHindi: 'पैंट German mein',
+        options: [
+          { text:'जूते', sub:'Schuhe', emoji:'👟', correct:false },
+          { text:'कमीज़', sub:'Hemd', emoji:'👔', correct:false },
+          { text:'पैंट', sub:'Hose', emoji:'👖', correct:true },
+          { text:'टोपी', sub:'Mütze', emoji:'🧢', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Kapde',
+        question: '"जूते" ko German mein kya kehte hain?',
+        hint: 'Kapde seekho',
+        charEmoji: '🤖', charGerman: 'Schuhe!', charHindi: 'जूते German mein',
+        options: [
+          { text:'Hose', sub:'पैंट', emoji:'👖', correct:false },
+          { text:'Schuhe', sub:'जूते', emoji:'👟', correct:true },
+          { text:'Mütze', sub:'टोपी', emoji:'🧢', correct:false },
+          { text:'Kleid', sub:'ड्रेस', emoji:'👗', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"ड्रेस" ke liye German word dhundho:',
+        hint: 'Kapde yaad hai?',
+        charEmoji: '🤖', charGerman: 'Kleid!', charHindi: 'ड्रेस German mein',
+        words: ['Mütze','Schuhe','Hemd','Kleid'],
+        answer: 'Kleid'
+      }
+    ]
+  },
+  {
+    id: 8, title: 'Mausam', icon: '☀️', section: '☀️ Advanced - Duniya',
+    questions: [
+      {
+        type: 'translate', qtype: 'German Mausam',
+        question: '"सूरज" ko German mein kya kehte hain?',
+        hint: 'Mausam seekho',
+        charEmoji: '🤖', charGerman: 'Sonne!', charHindi: 'सूरज German mein',
+        options: [
+          { text:'Wind', sub:'हवा', emoji:'💨', correct:false },
+          { text:'Schnee', sub:'बर्फ़', emoji:'❄️', correct:false },
+          { text:'Wolke', sub:'बादल', emoji:'☁️', correct:false },
+          { text:'Sonne', sub:'सूरज', emoji:'☀️', correct:true },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Mausam',
+        question: '"Regen" ka matlab kya hai?',
+        hint: 'Mausam ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Regen!', charHindi: 'बारिश German mein',
+        options: [
+          { text:'बारिश', sub:'Regen', emoji:'🌧️', correct:true },
+          { text:'बर्फ़', sub:'Schnee', emoji:'❄️', correct:false },
+          { text:'हवा', sub:'Wind', emoji:'💨', correct:false },
+          { text:'सूरज', sub:'Sonne', emoji:'☀️', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Mausam',
+        question: '"बर्फ़" ko German mein kya kehte hain?',
+        hint: 'Mausam seekho',
+        charEmoji: '🤖', charGerman: 'Schnee!', charHindi: 'बर्फ़ German mein',
+        options: [
+          { text:'Sonne', sub:'सूरज', emoji:'☀️', correct:false },
+          { text:'Wind', sub:'हवा', emoji:'💨', correct:false },
+          { text:'Schnee', sub:'बर्फ़', emoji:'❄️', correct:true },
+          { text:'Wolke', sub:'बादल', emoji:'☁️', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"हवा" ke liye German word dhundho:',
+        hint: 'Mausam yaad hai?',
+        charEmoji: '🤖', charGerman: 'Wind!', charHindi: 'हवा German mein',
+        words: ['Wind','Schnee','Regen','Sonne'],
+        answer: 'Wind'
+      }
+    ]
+  },
+  {
+    id: 9, title: 'Samay', icon: '🕐', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Samay',
+        question: '"सुबह" ko German mein kya kehte hain?',
+        hint: 'Samay seekho',
+        charEmoji: '🤖', charGerman: 'Morgen!', charHindi: 'सुबह German mein',
+        options: [
+          { text:'Morgen', sub:'सुबह', emoji:'🌅', correct:true },
+          { text:'Mittag', sub:'दोपहर', emoji:'🌞', correct:false },
+          { text:'Abend', sub:'शाम', emoji:'🌆', correct:false },
+          { text:'Uhr', sub:'घड़ी', emoji:'🕐', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Samay',
+        question: '"Abend" ka matlab kya hai?',
+        hint: 'Samay ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Abend!', charHindi: 'शाम German mein',
+        options: [
+          { text:'रात', sub:'Nacht', emoji:'🌙', correct:false },
+          { text:'घड़ी', sub:'Uhr', emoji:'🕐', correct:false },
+          { text:'शाम', sub:'Abend', emoji:'🌆', correct:true },
+          { text:'दोपहर', sub:'Mittag', emoji:'🌞', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Samay',
+        question: '"रात" ko German mein kya kehte hain?',
+        hint: 'Samay seekho',
+        charEmoji: '🤖', charGerman: 'Nacht!', charHindi: 'रात German mein',
+        options: [
+          { text:'Uhr', sub:'घड़ी', emoji:'🕐', correct:false },
+          { text:'Nacht', sub:'रात', emoji:'🌙', correct:true },
+          { text:'Mittag', sub:'दोपहर', emoji:'🌞', correct:false },
+          { text:'Abend', sub:'शाम', emoji:'🌆', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"दोपहर" ke liye German word dhundho:',
+        hint: 'Samay yaad hai?',
+        charEmoji: '🤖', charGerman: 'Mittag!', charHindi: 'दोपहर German mein',
+        words: ['Nacht','Abend','Mittag','Morgen'],
+        answer: 'Mittag'
+      }
+    ]
+  },
+  {
+    id: 10, title: 'Din', icon: '📅', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Din',
+        question: '"सोमवार" ko German mein kya kehte hain?',
+        hint: 'Din seekho',
+        charEmoji: '🤖', charGerman: 'Montag!', charHindi: 'सोमवार German mein',
+        options: [
+          { text:'Heute', sub:'आज', emoji:'📆', correct:false },
+          { text:'Woche', sub:'हफ़्ता', emoji:'🗓️', correct:false },
+          { text:'Freitag', sub:'शुक्रवार', emoji:'📅', correct:false },
+          { text:'Montag', sub:'सोमवार', emoji:'📅', correct:true },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Din',
+        question: '"Freitag" ka matlab kya hai?',
+        hint: 'Din ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Freitag!', charHindi: 'शुक्रवार German mein',
+        options: [
+          { text:'रविवार', sub:'Sonntag', emoji:'📅', correct:false },
+          { text:'आज', sub:'Heute', emoji:'📆', correct:false },
+          { text:'शुक्रवार', sub:'Freitag', emoji:'📅', correct:true },
+          { text:'सोमवार', sub:'Montag', emoji:'📅', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Din',
+        question: '"रविवार" ko German mein kya kehte hain?',
+        hint: 'Din seekho',
+        charEmoji: '🤖', charGerman: 'Sonntag!', charHindi: 'रविवार German mein',
+        options: [
+          { text:'Sonntag', sub:'रविवार', emoji:'📅', correct:true },
+          { text:'Montag', sub:'सोमवार', emoji:'📅', correct:false },
+          { text:'Freitag', sub:'शुक्रवार', emoji:'📅', correct:false },
+          { text:'Woche', sub:'हफ़्ता', emoji:'🗓️', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"हफ़्ता" ke liye German word dhundho:',
+        hint: 'Din yaad hai?',
+        charEmoji: '🤖', charGerman: 'Woche!', charHindi: 'हफ़्ता German mein',
+        words: ['Woche','Sonntag','Montag','Heute'],
+        answer: 'Woche'
+      }
+    ]
+  },
+  {
+    id: 11, title: 'Pesha', icon: '👨‍🏫', section: '🚀 Pro - Zindagi',
+    questions: [
+      {
+        type: 'translate', qtype: 'German Pesha',
+        question: '"शिक्षक" ko German mein kya kehte hain?',
+        hint: 'Pesha seekho',
+        charEmoji: '🤖', charGerman: 'Lehrer!', charHindi: 'शिक्षक German mein',
+        options: [
+          { text:'Polizist', sub:'पुलिस', emoji:'👮', correct:false },
+          { text:'Koch', sub:'रसोइया', emoji:'👨‍🍳', correct:false },
+          { text:'Arzt', sub:'डॉक्टर', emoji:'👨‍⚕️', correct:false },
+          { text:'Lehrer', sub:'शिक्षक', emoji:'👨‍🏫', correct:true },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Pesha',
+        question: '"Arzt" ka matlab kya hai?',
+        hint: 'Pesha ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Arzt!', charHindi: 'डॉक्टर German mein',
+        options: [
+          { text:'डॉक्टर', sub:'Arzt', emoji:'👨‍⚕️', correct:true },
+          { text:'रसोइया', sub:'Koch', emoji:'👨‍🍳', correct:false },
+          { text:'पुलिस', sub:'Polizist', emoji:'👮', correct:false },
+          { text:'शिक्षक', sub:'Lehrer', emoji:'👨‍🏫', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Pesha',
+        question: '"पुलिस" ko German mein kya kehte hain?',
+        hint: 'Pesha seekho',
+        charEmoji: '🤖', charGerman: 'Polizist!', charHindi: 'पुलिस German mein',
+        options: [
+          { text:'Polizist', sub:'पुलिस', emoji:'👮', correct:true },
+          { text:'Koch', sub:'रसोइया', emoji:'👨‍🍳', correct:false },
+          { text:'Arzt', sub:'डॉक्टर', emoji:'👨‍⚕️', correct:false },
+          { text:'Bauer', sub:'किसान', emoji:'👨‍🌾', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"रसोइया" ke liye German word dhundho:',
+        hint: 'Pesha yaad hai?',
+        charEmoji: '🤖', charGerman: 'Koch!', charHindi: 'रसोइया German mein',
+        words: ['Bauer','Lehrer','Koch','Polizist'],
+        answer: 'Koch'
+      }
+    ]
+  },
+  {
+    id: 12, title: 'Jagah', icon: '🏫', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Jagah',
+        question: '"स्कूल" ko German mein kya kehte hain?',
+        hint: 'Jagah seekho',
+        charEmoji: '🤖', charGerman: 'Schule!', charHindi: 'स्कूल German mein',
+        options: [
+          { text:'Park', sub:'पार्क', emoji:'🌳', correct:false },
+          { text:'Markt', sub:'बाज़ार', emoji:'🏪', correct:false },
+          { text:'Krankenhaus', sub:'अस्पताल', emoji:'🏥', correct:false },
+          { text:'Schule', sub:'स्कूल', emoji:'🏫', correct:true },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Jagah',
+        question: '"Haus" ka matlab kya hai?',
+        hint: 'Jagah ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Haus!', charHindi: 'घर German mein',
+        options: [
+          { text:'अस्पताल', sub:'Krankenhaus', emoji:'🏥', correct:false },
+          { text:'पार्क', sub:'Park', emoji:'🌳', correct:false },
+          { text:'घर', sub:'Haus', emoji:'🏠', correct:true },
+          { text:'बाज़ार', sub:'Markt', emoji:'🏪', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Jagah',
+        question: '"बाज़ार" ko German mein kya kehte hain?',
+        hint: 'Jagah seekho',
+        charEmoji: '🤖', charGerman: 'Markt!', charHindi: 'बाज़ार German mein',
+        options: [
+          { text:'Haus', sub:'घर', emoji:'🏠', correct:false },
+          { text:'Park', sub:'पार्क', emoji:'🌳', correct:false },
+          { text:'Markt', sub:'बाज़ार', emoji:'🏪', correct:true },
+          { text:'Schule', sub:'स्कूल', emoji:'🏫', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"अस्पताल" ke liye German word dhundho:',
+        hint: 'Jagah yaad hai?',
+        charEmoji: '🤖', charGerman: 'Krankenhaus!', charHindi: 'अस्पताल German mein',
+        words: ['Markt','Krankenhaus','Schule','Haus'],
+        answer: 'Krankenhaus'
+      }
+    ]
+  },
+  {
+    id: 13, title: 'Kriya', icon: '🏃', section: '⚡ Master - Kriya aur Visheshan',
+    questions: [
+      {
+        type: 'translate', qtype: 'German Kriya',
+        question: '"जाना" ko German mein kya kehte hain?',
+        hint: 'Kriya seekho',
+        charEmoji: '🤖', charGerman: 'gehen!', charHindi: 'जाना German mein',
+        options: [
+          { text:'schlafen', sub:'सोना', emoji:'😴', correct:false },
+          { text:'trinken', sub:'पीना', emoji:'🥤', correct:false },
+          { text:'gehen', sub:'जाना', emoji:'🚶', correct:true },
+          { text:'spielen', sub:'खेलना', emoji:'⚽', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Kriya',
+        question: '"essen" ka matlab kya hai?',
+        hint: 'Kriya ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'essen!', charHindi: 'खाना German mein',
+        options: [
+          { text:'पीना', sub:'trinken', emoji:'🥤', correct:false },
+          { text:'जाना', sub:'gehen', emoji:'🚶', correct:false },
+          { text:'खाना', sub:'essen', emoji:'🍽️', correct:true },
+          { text:'सोना', sub:'schlafen', emoji:'😴', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Kriya',
+        question: '"पीना" ko German mein kya kehte hain?',
+        hint: 'Kriya seekho',
+        charEmoji: '🤖', charGerman: 'trinken!', charHindi: 'पीना German mein',
+        options: [
+          { text:'spielen', sub:'खेलना', emoji:'⚽', correct:false },
+          { text:'trinken', sub:'पीना', emoji:'🥤', correct:true },
+          { text:'essen', sub:'खाना', emoji:'🍽️', correct:false },
+          { text:'gehen', sub:'जाना', emoji:'🚶', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"सोना" ke liye German word dhundho:',
+        hint: 'Kriya yaad hai?',
+        charEmoji: '🤖', charGerman: 'schlafen!', charHindi: 'सोना German mein',
+        words: ['spielen','trinken','essen','schlafen'],
+        answer: 'schlafen'
+      }
+    ]
+  },
+  {
+    id: 14, title: 'Visheshan', icon: '📏', section: null,
+    questions: [
+      {
+        type: 'translate', qtype: 'German Visheshan',
+        question: '"बड़ा" ko German mein kya kehte hain?',
+        hint: 'Visheshan seekho',
+        charEmoji: '🤖', charGerman: 'groß!', charHindi: 'बड़ा German mein',
+        options: [
+          { text:'schön', sub:'सुंदर', emoji:'🌸', correct:false },
+          { text:'schlecht', sub:'बुरा', emoji:'👎', correct:false },
+          { text:'groß', sub:'बड़ा', emoji:'📏', correct:true },
+          { text:'klein', sub:'छोटा', emoji:'🤏', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Visheshan',
+        question: '"klein" ka matlab kya hai?',
+        hint: 'Visheshan ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'klein!', charHindi: 'छोटा German mein',
+        options: [
+          { text:'छोटा', sub:'klein', emoji:'🤏', correct:true },
+          { text:'अच्छा', sub:'gut', emoji:'👍', correct:false },
+          { text:'बड़ा', sub:'groß', emoji:'📏', correct:false },
+          { text:'सुंदर', sub:'schön', emoji:'🌸', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Visheshan',
+        question: '"अच्छा" ko German mein kya kehte hain?',
+        hint: 'Visheshan seekho',
+        charEmoji: '🤖', charGerman: 'gut!', charHindi: 'अच्छा German mein',
+        options: [
+          { text:'groß', sub:'बड़ा', emoji:'📏', correct:false },
+          { text:'schlecht', sub:'बुरा', emoji:'👎', correct:false },
+          { text:'gut', sub:'अच्छा', emoji:'👍', correct:true },
+          { text:'klein', sub:'छोटा', emoji:'🤏', correct:false },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"बुरा" ke liye German word dhundho:',
+        hint: 'Visheshan yaad hai?',
+        charEmoji: '🤖', charGerman: 'schlecht!', charHindi: 'बुरा German mein',
+        words: ['schön','gut','schlecht','klein'],
+        answer: 'schlecht'
+      }
+    ]
+  },
+  {
+    id: 15, title: 'Sawari', icon: '🚗', section: '🏆 Legend - Final Level',
+    questions: [
+      {
+        type: 'translate', qtype: 'German Sawari',
+        question: '"कार" ko German mein kya kehte hain?',
+        hint: 'Sawari seekho',
+        charEmoji: '🤖', charGerman: 'Auto!', charHindi: 'कार German mein',
+        options: [
+          { text:'Bus', sub:'बस', emoji:'🚌', correct:false },
+          { text:'Flugzeug', sub:'हवाई जहाज़', emoji:'✈️', correct:false },
+          { text:'Zug', sub:'ट्रेन', emoji:'🚆', correct:false },
+          { text:'Auto', sub:'कार', emoji:'🚗', correct:true },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Sawari',
+        question: '"Bus" ka matlab kya hai?',
+        hint: 'Sawari ka word yaad karo',
+        charEmoji: '🤖', charGerman: 'Bus!', charHindi: 'बस German mein',
+        options: [
+          { text:'हवाई जहाज़', sub:'Flugzeug', emoji:'✈️', correct:false },
+          { text:'साइकिल', sub:'Fahrrad', emoji:'🚲', correct:false },
+          { text:'बस', sub:'Bus', emoji:'🚌', correct:true },
+          { text:'कार', sub:'Auto', emoji:'🚗', correct:false },
+        ]
+      },
+      {
+        type: 'translate', qtype: 'German Sawari',
+        question: '"ट्रेन" ko German mein kya kehte hain?',
+        hint: 'Sawari seekho',
+        charEmoji: '🤖', charGerman: 'Zug!', charHindi: 'ट्रेन German mein',
+        options: [
+          { text:'Bus', sub:'बस', emoji:'🚌', correct:false },
+          { text:'Flugzeug', sub:'हवाई जहाज़', emoji:'✈️', correct:false },
+          { text:'Fahrrad', sub:'साइकिल', emoji:'🚲', correct:false },
+          { text:'Zug', sub:'ट्रेन', emoji:'🚆', correct:true },
+        ]
+      },
+      {
+        type: 'wordbank', qtype: 'Sahi Word Chunno',
+        question: '"साइकिल" ke liye German word dhundho:',
+        hint: 'Sawari yaad hai?',
+        charEmoji: '🤖', charGerman: 'Fahrrad!', charHindi: 'साइकिल German mein',
+        words: ['Bus','Auto','Fahrrad','Flugzeug'],
+        answer: 'Fahrrad'
+      }
+    ]
+  },
+];
+
+// ======================================================
+// STATE & VARS
+// ======================================================
+
+let state = { xp:0, streak:0, completedLessons:[], learnedWords:[], lessonsToday:0 };
+let currentUser = null;
+let currentLesson = null;
+let currentQIdx = 0;
+let hearts = 3;
+let correctCount = 0;
+let lessonStartTime = 0;
+let selectedAnswer = null;
+let wordBankAnswer = [];
+let wordBankUsed = [];
+
+// ======================================================
+// STORAGE — localStorage only (100% reliable)
+// ======================================================
+
+function storageKey() {
+  if (!currentUser) return 'apeion_guest';
+  return 'apeion_data_' + currentUser.uid;
+}
+
+function save() {
+  try {
+    localStorage.setItem(storageKey(), JSON.stringify(state));
+    showSaveToast();
+  } catch(e) {
+    console.error('Save failed:', e);
+  }
+}
+
+function loadState() {
+  try {
+    const key = storageKey();
+    const raw = localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        state = parsed;
+        return true;
+      }
+    }
+  } catch(e) {}
+  state = { xp:0, streak:0, completedLessons:[], learnedWords:[], lessonsToday:0 };
+  return false;
+}
+
+function saveSession() {
+  if (!currentUser) return;
+  localStorage.setItem('apeion_session', JSON.stringify(currentUser));
+}
+
+function clearSession() {
+  localStorage.removeItem('apeion_session');
+}
+
+function showSaveToast() {
+  const old = document.querySelector('.save-toast');
+  if (old) old.remove();
+  const el = document.createElement('div');
+  el.className = 'save-toast';
+  el.textContent = '💾 Progress save ho gaya!';
+  document.body.appendChild(el);
+  setTimeout(() => { if(el.parentNode) el.remove(); }, 2000);
+}
+
+// ======================================================
+// LOGIN SYSTEM
+// ======================================================
+
+// Called when Google button is tapped — always shows name+email form
+// (Real Google OAuth needs a backend; this is a secure local account system)
+function signInWithGoogle() {
+  showAccountForm();
+}
+
+function showAccountForm() {
+  const card = document.querySelector('.login-card');
+  card.innerHTML = `
+    <div class="login-card-title">👤 Apna Account Banao</div>
+    <div class="login-card-sub">Ek baar naam daalo — hamesha yahi account use hoga</div>
+    <input id="loginName" type="text" placeholder="Aapka naam (jaise: Rahul)" maxlength="30"
+      style="width:100%;background:var(--card2);border:2px solid var(--border);border-radius:12px;
+      padding:13px 16px;color:#fff;font-size:16px;font-family:var(--font);outline:none;
+      margin-bottom:12px;display:block;"
+      oninput="checkLoginForm()">
+    <input id="loginPin" type="password" placeholder="4-digit PIN banao (jaise: 1234)" maxlength="4"
+      inputmode="numeric" pattern="[0-9]*"
+      style="width:100%;background:var(--card2);border:2px solid var(--border);border-radius:12px;
+      padding:13px 16px;color:#fff;font-size:20px;font-family:var(--font);outline:none;
+      margin-bottom:16px;display:block;letter-spacing:8px;"
+      oninput="checkLoginForm()">
+    <div id="loginMsg" style="font-size:12px;color:var(--text2);font-family:var(--font2);margin-bottom:12px;min-height:16px;"></div>
+    <button id="loginSubmitBtn" onclick="submitAccountLogin()" disabled
+      style="width:100%;background:var(--green);border:none;border-radius:12px;padding:15px;
+      font-size:16px;font-weight:800;color:#fff;font-family:var(--font);cursor:pointer;
+      box-shadow:0 4px 0 var(--green-dark);opacity:0.5;transition:opacity 0.2s;">
+      🚀 Login / Sign Up
+    </button>
+    <button onclick="signInAsGuest()"
+      style="width:100%;background:transparent;border:1px solid var(--border);border-radius:12px;
+      padding:11px;font-size:13px;color:var(--text2);font-family:var(--font);cursor:pointer;margin-top:10px;">
+      👤 Guest Mode (progress save nahi hoga)
+    </button>
+    <div style="font-size:11px;color:var(--text2);font-family:var(--font2);text-align:center;margin-top:12px;opacity:0.6;">
+      PIN yaad rakhein — isi se wapas login kar sakte hain
+    </div>
+  `;
+  setTimeout(() => document.getElementById('loginName') && document.getElementById('loginName').focus(), 100);
+}
+
+function checkLoginForm() {
+  const name = (document.getElementById('loginName').value || '').trim();
+  const pin = (document.getElementById('loginPin').value || '').trim();
+  const btn = document.getElementById('loginSubmitBtn');
+  const msg = document.getElementById('loginMsg');
+  const valid = name.length >= 2 && pin.length === 4 && /^\d{4}$/.test(pin);
+  btn.disabled = !valid;
+  btn.style.opacity = valid ? '1' : '0.5';
+  btn.style.cursor = valid ? 'pointer' : 'not-allowed';
+  if (pin.length > 0 && !/^\d+$/.test(pin)) {
+    msg.textContent = '⚠️ PIN mein sirf numbers hone chahiye';
+    msg.style.color = 'var(--red)';
+  } else if (pin.length > 0 && pin.length < 4) {
+    msg.textContent = '🔢 PIN 4 numbers ka hona chahiye';
+    msg.style.color = 'var(--text2)';
+  } else if (valid) {
+    msg.textContent = '✅ Bilkul sahi! Aage badho';
+    msg.style.color = 'var(--green)';
+  } else {
+    msg.textContent = '';
+  }
+}
+
+async function submitAccountLogin() {
+  const nameEl = document.getElementById('loginName');
+  const pinEl = document.getElementById('loginPin');
+  if (!nameEl || !pinEl) return;
+  const name = nameEl.value.trim();
+  const pin = pinEl.value.trim();
+  if (name.length < 2 || pin.length !== 4) return;
+
+  // Stable UID: simple string, no special chars, same name+pin always = same uid
+  const rawKey = name.toLowerCase().replace(/\s+/g, '') + pin;
+  let hash = 0;
+  for (let i = 0; i < rawKey.length; i++) {
+    hash = ((hash << 5) - hash) + rawKey.charCodeAt(i);
+    hash |= 0;
+  }
+  const uid = 'u' + Math.abs(hash).toString(36);
+
+  currentUser = { name, uid };
+
+  const btn = document.getElementById('loginSubmitBtn');
+  btn.textContent = '⏳ Loading...';
+  btn.disabled = true;
+
+  const loaded = loadState(); // sync now
+  saveSession();
+  updateUserUI();
+  goTo('homeScreen');
+
+  if (loaded) {
+    setTimeout(() => showSaveToast(), 400);
+  }
+}
+
+async function signInAsGuest() {
+  let guestId = localStorage.getItem('apeion_guest_id');
+  if (!guestId) {
+    guestId = 'guest' + Date.now().toString(36);
+    localStorage.setItem('apeion_guest_id', guestId);
+  }
+  currentUser = { name: 'Guest', uid: guestId };
+  loadState();
+  updateUserUI();
+  goTo('homeScreen');
+}
+
+function signOut() {
+  if (confirm('Sign out karna chahte hain?\n\nAapka progress save hai — PIN se wapas login karein.')) {
+    clearSession();
+    currentUser = null;
+    state = { xp:0, streak:0, completedLessons:[], learnedWords:[], lessonsToday:0 };
+    goTo('loginScreen');
+    // Restore original login card
+    document.querySelector('.login-card').innerHTML = `
+      <div class="login-card-title">🚀 Sign In Karo</div>
+      <div class="login-card-sub">Apna progress kabhi mat khoye</div>
+      <button class="google-btn" onclick="signInWithGoogle()">
+        <svg class="google-icon" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Account Banao / Login Karo
+      </button>
+      <div class="divider"><div class="divider-line"></div><div class="divider-text">ya phir</div><div class="divider-line"></div></div>
+      <button class="guest-btn" onclick="signInAsGuest()">👤 Guest ke roop mein khelo</button>
+    `;
+  }
+}
+
+function updateUserUI() {
+  if (!currentUser) return;
+  updateHomeStats();
+  const avatarEl = document.getElementById('pathUserAvatar');
+  if (avatarEl) avatarEl.textContent = currentUser.name[0].toUpperCase();
+  const bigEl = document.getElementById('profileAvatarBig');
+  if (bigEl) {
+    bigEl.textContent = currentUser.name[0].toUpperCase();
+    bigEl.style.cssText = 'font-size:36px;width:80px;height:80px;border-radius:50%;background:var(--card2);border:3px solid var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;';
+  }
+  const nameEl = document.getElementById('profileName');
+  if (nameEl) nameEl.textContent = currentUser.name;
+  const emailEl = document.getElementById('profileEmail');
+  if (emailEl) emailEl.textContent = currentUser.uid.startsWith('guest') ? 'Guest Mode' : 'Apeion Account';
+}
+
+// ======================================================
+// UTILS
+// ======================================================
+
+function goTo(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  if (screenId === 'pathScreen') { renderPath(); updateUserUI(); }
+  if (screenId === 'vocabScreen') renderVocab();
+  if (screenId === 'profileScreen') { renderProfile(); updateUserUI(); }
+  if (screenId === 'homeScreen') { updateHomeStats(); updateUserUI(); }
+}
+
+function updateHomeStats() {
+  document.getElementById('homeStreak').textContent = state.streak + ' din';
+  document.getElementById('homeXP').textContent = state.xp + ' XP';
+}
+
+function showXPPopup(amount) {
+  const el = document.createElement('div');
+  el.className = 'xp-popup';
+  el.textContent = '+' + amount + ' XP! ⭐';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1500);
+}
+
+function showConfetti() {
+  const colors = ['#58CC02','#FFC800','#FF4B4B','#1CB0F6','#CE82FF','#FF9600'];
+  for (let i = 0; i < 20; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.cssText = `left:${Math.random()*100}%;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*0.5}s;animation-duration:${1+Math.random()*0.8}s;transform:rotate(${Math.random()*360}deg);border-radius:${Math.random()>0.5?'50%':'2px'};`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }, i * 60);
+  }
+}
+
+// ======================================================
+// PATH RENDERER
+// ======================================================
+
+function renderPath() {
+  document.getElementById('pathStreak').textContent = state.streak;
+  document.getElementById('pathXP').textContent = state.xp;
+
+  const container = document.getElementById('pathContainer');
+  container.innerHTML = '';
+
+  let currentSection = null;
+  let lessonIndex = 0;
+
+  LESSONS.forEach((lesson, idx) => {
+    const isCompleted = state.completedLessons.includes(lesson.id);
+    const isAvailable = idx === 0 || state.completedLessons.includes(LESSONS[idx-1].id);
+    const isCurrent = isAvailable && !isCompleted;
+
+    if (lesson.section && lesson.section !== currentSection) {
+      if (lessonIndex > 0) {
+        const conn = document.createElement('div');
+        conn.className = 'path-connector';
+        container.appendChild(conn);
+      }
+      currentSection = lesson.section;
+      const sec = document.createElement('div');
+      sec.className = 'section-header';
+      sec.innerHTML = lesson.section;
+      container.appendChild(sec);
+    }
+
+    const offsets = [0, 40, 70, 40, 0, -40, -70, -40];
+    const offset = offsets[lessonIndex % 8];
+
+    const row = document.createElement('div');
+    row.className = 'lesson-row';
+    row.style.transform = `translateX(${offset}px)`;
+
+    const btn = document.createElement('button');
+    btn.className = 'lesson-btn ' + (isCompleted ? 'completed' : isCurrent ? 'current' : isAvailable ? 'available' : 'locked');
+    btn.textContent = isCompleted ? '✅' : lesson.icon;
+    btn.disabled = !isAvailable;
+
+    const lbl = document.createElement('span');
+    lbl.className = 'lesson-label';
+    lbl.textContent = lesson.title;
+    btn.appendChild(lbl);
+
+    if (isAvailable) btn.onclick = () => startLesson(lesson.id);
+    row.appendChild(btn);
+    container.appendChild(row);
+
+    if (idx < LESSONS.length - 1) {
+      const conn = document.createElement('div');
+      conn.className = 'path-connector';
+      container.appendChild(conn);
+    }
+
+    lessonIndex++;
+  });
+}
+
+// ======================================================
+// LESSON ENGINE
+// ======================================================
+
+function startLesson(lessonId) {
+  currentLesson = LESSONS.find(l => l.id === lessonId);
+  currentQIdx = 0;
+  hearts = 3;
+  correctCount = 0;
+  lessonStartTime = Date.now();
+  selectedAnswer = null;
+  wordBankAnswer = [];
+  wordBankUsed = [];
+
+  goTo('lessonScreen');
+  renderQuestion();
+}
+
+function closeLesson() {
+  goTo('pathScreen');
+}
+
+function renderQuestion() {
+  const q = currentLesson.questions[currentQIdx];
+  const total = currentLesson.questions.length;
+  const progress = (currentQIdx / total) * 100;
+
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('heartsDisplay').innerHTML = '❤️'.repeat(hearts) + '🖤'.repeat(3 - hearts);
+
+  const content = document.getElementById('lessonContent');
+  content.innerHTML = '';
+
+  // Remove any existing feedback
+  const oldFeedback = document.querySelector('.feedback-panel');
+  if (oldFeedback) oldFeedback.remove();
+
+  // Question type label
+  const typeEl = document.createElement('div');
+  typeEl.className = 'question-type';
+  typeEl.textContent = q.qtype;
+  content.appendChild(typeEl);
+
+  // Question text
+  const qEl = document.createElement('div');
+  qEl.className = 'question-text';
+  qEl.textContent = q.question;
+  content.appendChild(qEl);
+
+  const hintEl = document.createElement('div');
+  hintEl.className = 'question-hint';
+  hintEl.textContent = '💡 ' + q.hint;
+  content.appendChild(hintEl);
+
+  // Character bubble
+  const charDiv = document.createElement('div');
+  charDiv.className = 'char-display';
+  charDiv.innerHTML = `
+    <div class="char-avatar">${q.charEmoji}</div>
+    <div class="char-bubble">
+      <div class="bubble-german">${q.charGerman}</div>
+      <div class="bubble-hindi">${q.charHindi}</div>
+    </div>
+  `;
+  content.appendChild(charDiv);
+
+  if (q.type === 'translate') {
+    renderMCQ(q, content);
+  } else if (q.type === 'wordbank') {
+    renderWordBank(q, content);
+  }
+}
+
+function renderMCQ(q, container) {
+  selectedAnswer = null;
+  const grid = document.createElement('div');
+  grid.className = 'options-grid two-col';
+
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `
+      <span class="option-emoji">${opt.emoji}</span>
+      <div class="option-text">
+        <div>${opt.text}</div>
+        <div class="option-sub">${opt.sub}</div>
+      </div>
+    `;
+    btn.onclick = () => selectMCQ(btn, opt, q, grid);
+    grid.appendChild(btn);
+  });
+
+  container.appendChild(grid);
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'check-btn';
+  checkBtn.textContent = 'Jaanch Karo ✓';
+  checkBtn.id = 'checkBtn';
+  checkBtn.disabled = true;
+  container.appendChild(checkBtn);
+}
+
+function selectMCQ(btn, opt, q, grid) {
+  grid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedAnswer = opt;
+  const checkBtn = document.getElementById('checkBtn');
+  checkBtn.disabled = false;
+  checkBtn.onclick = () => submitMCQ(opt, q, grid);
+}
+
+function submitMCQ(opt, q, grid) {
+  const isCorrect = opt.correct;
+  const correctOpt = q.options.find(o => o.correct);
+
+  grid.querySelectorAll('.option-btn').forEach((btn, idx) => {
+    if (q.options[idx].correct) btn.classList.add('correct');
+    else if (q.options[idx] === opt && !isCorrect) btn.classList.add('wrong');
+    btn.disabled = true;
+  });
+
+  document.getElementById('checkBtn').style.display = 'none';
+  showFeedback(isCorrect, correctOpt.text + ' = ' + correctOpt.sub);
+}
+
+function renderWordBank(q, container) {
+  wordBankAnswer = [];
+  wordBankUsed = new Array(q.words.length).fill(false);
+
+  const label = document.createElement('div');
+  label.className = 'question-hint';
+  label.textContent = '👇 Sahi word pe tap karo:';
+  container.appendChild(label);
+
+  const answerArea = document.createElement('div');
+  answerArea.className = 'word-bank-area';
+  answerArea.id = 'answerArea';
+  container.appendChild(answerArea);
+
+  const bankDiv = document.createElement('div');
+  bankDiv.className = 'word-bank';
+  bankDiv.id = 'wordBank';
+
+  q.words.forEach((word, idx) => {
+    const chip = document.createElement('div');
+    chip.className = 'word-chip';
+    chip.textContent = word;
+    chip.id = 'chip_' + idx;
+    chip.onclick = () => selectWord(word, idx, chip, answerArea, q);
+    bankDiv.appendChild(chip);
+  });
+
+  container.appendChild(bankDiv);
+
+  const checkBtn = document.createElement('button');
+  checkBtn.className = 'check-btn';
+  checkBtn.textContent = 'Jaanch Karo ✓';
+  checkBtn.id = 'checkBtn';
+  checkBtn.disabled = true;
+  container.appendChild(checkBtn);
+}
+
+function selectWord(word, idx, chip, answerArea, q) {
+  if (wordBankUsed[idx]) return;
+
+  wordBankUsed[idx] = true;
+  wordBankAnswer.push({ word, idx });
+  chip.classList.add('used');
+
+  const placed = document.createElement('div');
+  placed.className = 'word-chip in-answer';
+  placed.textContent = word;
+  placed.onclick = () => {
+    answerArea.removeChild(placed);
+    wordBankAnswer = wordBankAnswer.filter(w => w.idx !== idx);
+    wordBankUsed[idx] = false;
+    chip.classList.remove('used');
+    if (wordBankAnswer.length === 0) {
+      document.getElementById('checkBtn').disabled = true;
+    }
+  };
+  answerArea.appendChild(placed);
+
+  document.getElementById('checkBtn').disabled = false;
+  document.getElementById('checkBtn').onclick = () => submitWordBank(q);
+}
+
+function submitWordBank(q) {
+  const userAnswer = wordBankAnswer.map(w => w.word).join(' ');
+  const isCorrect = userAnswer.trim() === q.answer.trim();
+  document.getElementById('checkBtn').style.display = 'none';
+  showFeedback(isCorrect, 'Sahi jawab: ' + q.answer);
+}
+
+function showFeedback(isCorrect, explanation) {
+  if (isCorrect) {
+    correctCount++;
+    const xpGained = 5;
+    state.xp += xpGained;
+    save();
+    showXPPopup(xpGained);
+  } else {
+    hearts = Math.max(0, hearts - 1);
+  }
+
+  const panel = document.createElement('div');
+  panel.className = 'feedback-panel ' + (isCorrect ? 'correct' : 'wrong');
+  panel.innerHTML = `
+    <div class="feedback-title">${isCorrect ? '🎉 Sahi Jawab! बिल्कुल सही!' : '❌ Galat! Koi baat nahi!'}</div>
+    <div class="feedback-answer">${explanation}</div>
+    <button class="continue-btn" onclick="nextQuestion()">${currentQIdx < currentLesson.questions.length - 1 ? 'Aage Badho →' : '🏆 Khatam Karo!'}</button>
+  `;
+  document.body.appendChild(panel);
+}
+
+function nextQuestion() {
+  const panel = document.querySelector('.feedback-panel');
+  if (panel) panel.remove();
+
+  currentQIdx++;
+
+  if (currentQIdx >= currentLesson.questions.length || hearts <= 0) {
+    completeLessonScreen();
+  } else {
+    renderQuestion();
+  }
+}
+
+function completeLessonScreen() {
+  const timeSec = Math.floor((Date.now() - lessonStartTime) / 1000);
+  const total = currentLesson.questions.length;
+  const accuracy = Math.round((correctCount / total) * 100);
+  const xpBonus = 15;
+
+  if (!state.completedLessons.includes(currentLesson.id)) {
+    state.completedLessons.push(currentLesson.id);
+    state.lessonsToday++;
+    state.xp += xpBonus;
+    state.streak = Math.max(1, state.streak);
+
+    // Mark words as learned
+    const lessonWords = VOCAB.filter(v => v.level === currentLesson.id + 1);
+    lessonWords.forEach(w => {
+      if (!state.learnedWords.includes(w.id)) state.learnedWords.push(w.id);
+    });
+    save();
+  }
+
+  document.getElementById('cXP').textContent = '+' + (correctCount * 5 + xpBonus);
+  document.getElementById('cAccuracy').textContent = accuracy + '%';
+  document.getElementById('cTime').textContent = timeSec + 's';
+
+  showConfetti();
+  goTo('completeScreen');
+}
+
+function finishLesson() {
+  goTo('pathScreen');
+}
+
+// ======================================================
+// VOCAB SCREEN
+// ======================================================
+
+function renderVocab() {
+  const list = document.getElementById('vocabList');
+  list.innerHTML = '';
+
+  let lastCat = null;
+  VOCAB.forEach(v => {
+    if (v.category !== lastCat) {
+      lastCat = v.category;
+      const hdr = document.createElement('div');
+      hdr.style.cssText = 'font-size:13px; font-weight:700; color:#afafaf; letter-spacing:1px; text-transform:uppercase; font-family:var(--font2); padding: 8px 0 4px;';
+      hdr.textContent = v.category;
+      list.appendChild(hdr);
+    }
+
+    const isLearned = state.learnedWords.includes(v.id);
+    const card = document.createElement('div');
+    card.className = 'vocab-card';
+    card.innerHTML = `
+      <div class="vocab-emoji">${v.emoji}</div>
+      <div class="vocab-text">
+        <div class="vocab-german">${v.german}</div>
+        <div class="vocab-hindi">${v.hindi}</div>
+        <div class="vocab-level">Level ${v.level} • ${v.category}</div>
+      </div>
+      <div class="vocab-badge ${isLearned ? 'learned' : 'new'}">${isLearned ? '✓ Seekha' : 'Naya'}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+// ======================================================
+// PROFILE SCREEN
+// ======================================================
+
+const ACHIEVEMENTS = [
+  { icon:'🌱', name:'Pehla Qadam', desc:'Pehla lesson complete kiya', unlocked: s => s.completedLessons.length >= 1 },
+  { icon:'🔥', name:'Jazba', desc:'3 lessons complete kiye', unlocked: s => s.completedLessons.length >= 3 },
+  { icon:'⭐', name:'100 XP Club', desc:'100 XP kamaye', unlocked: s => s.xp >= 100 },
+  { icon:'🚴', name:'Aadha Safar', desc:'8 lessons complete kiye', unlocked: s => s.completedLessons.length >= 8 },
+  { icon:'📚', name:'Shabd Prem', desc:'20 words seekhe', unlocked: s => s.learnedWords.length >= 20 },
+  { icon:'💎', name:'500 XP', desc:'500 XP kamaye', unlocked: s => s.xp >= 500 },
+  { icon:'🧠', name:'Shabdkosh', desc:'50 words seekhe', unlocked: s => s.learnedWords.length >= 50 },
+  { icon:'🚀', name:'1000 XP', desc:'1000 XP kamaye', unlocked: s => s.xp >= 1000 },
+  { icon:'👑', name:'Poora Shabdkosh', desc:'Sab words seekhe', unlocked: s => s.learnedWords.length >= VOCAB.length },
+  { icon:'🏆', name:'German Warrior', desc:'Sab lessons complete kiye', unlocked: s => s.completedLessons.length >= LESSONS.length },
+];
+
+function renderProfile() {
+  document.getElementById('pXP').textContent = state.xp;
+  document.getElementById('pStreak').textContent = state.streak;
+  document.getElementById('pLessons').textContent = state.completedLessons.length;
+
+  const grid = document.getElementById('achGrid');
+  grid.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const card = document.createElement('div');
+    const unlocked = a.unlocked(state);
+    card.className = 'ach-card' + (unlocked ? '' : ' locked');
+    card.innerHTML = `
+      <div class="ach-icon">${unlocked ? a.icon : '🔒'}</div>
+      <div class="ach-name">${a.name}</div>
+      <div class="ach-desc">${a.desc}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+// ======================================================
+// AI TEACHER (Sonar) — Groq API Chat
+// ======================================================
+
+// API calls go through secure Vercel proxy — no key exposed in client
+const PROXY_URL = '/api/chat';
+
+const AI_MODEL = 'openai/gpt-oss-20b';
+
+let aiChatHistory = [
+  { role: 'system', content: 'Tum "Sonar" ho, ek friendly AI German teacher jo Hinglish (Hindi-English mix) mein baat karta hai. Tumhara kaam hai student ko German (Deutsch) sikhana — vocab, grammar, sentences, pronunciation tips, sab kuch. Chhote, simple aur encouraging jawab do. Jab student German mein kuch likhe, uski galtiyan pyaar se sudhaaro aur sahi tareeka batao. Naye German words sikhate waqt hamesha Hindi meaning bhi saath mein do. Emoji ka thoda istemal karo taaki friendly aur mazedaar lage. Jawab zyada lamba mat rakho.' }
+];
+let aiSending = false;
+
+async function sendAIMessage() {
+  const input = document.getElementById('aiChatInput');
+  const text = input.value.trim();
+  if (!text || aiSending) return;
+
+  input.value = '';
+  appendAIMessage('user', text);
+  aiChatHistory.push({ role: 'user', content: text });
+
+  aiSending = true;
+  document.getElementById('aiTyping').style.display = 'flex';
+  scrollAIChat();
+
+  try {
+    const response = await fetch(PROXY_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: AI_MODEL,
+        messages: aiChatHistory,
+        temperature: 0.7,
+        max_tokens: 600
+      })
+    });
+
+    if (!response.ok) throw new Error('API error ' + response.status);
+
+    const data = await response.json();
+    const reply = (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || 'Maaf karo, jawab nahi mila. Phir se try karo.';
+
+    aiChatHistory.push({ role: 'assistant', content: reply });
+    document.getElementById('aiTyping').style.display = 'none';
+    appendAIMessage('bot', reply);
+  } catch (e) {
+    document.getElementById('aiTyping').style.display = 'none';
+    appendAIMessage('bot', 'Kuch gadbad ho gayi 😔 Internet check karo ya thodi der baad try karo.', true);
+  }
+
+  aiSending = false;
+  scrollAIChat();
+}
+
+function appendAIMessage(sender, text, isError) {
+  const area = document.getElementById('aiChatArea');
+  const msg = document.createElement('div');
+  msg.className = 'ai-msg ' + (sender === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
+  msg.innerHTML = `
+    <div class="ai-msg-avatar">${sender === 'user' ? '🙂' : '🤖'}</div>
+    <div class="ai-msg-bubble${isError ? ' ai-error' : ''}"></div>
+  `;
+  msg.querySelector('.ai-msg-bubble').textContent = text;
+  area.appendChild(msg);
+  scrollAIChat();
+}
+
+function scrollAIChat() {
+  const area = document.getElementById('aiChatArea');
+  if (area) area.scrollTop = area.scrollHeight;
+}
+
+// ======================================================
+// INIT — Auto session restore
+// ======================================================
+
+(function init() {
+  try {
+    const savedUser = JSON.parse(localStorage.getItem('apeion_session'));
+    if (savedUser && savedUser.uid) {
+      currentUser = savedUser;
+      loadState();
+      updateUserUI();
+      goTo('homeScreen');
+      return;
+    }
+  } catch(e) {}
+  goTo('loginScreen');
+})();
+
+
+</script>
+</body>
+</html>
